@@ -1,0 +1,6 @@
+/data
+.DS_Store
+.RData
+.RHistory
+__pycache__/
+/.venv/

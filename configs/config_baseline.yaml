@@ -1,0 +1,41 @@
+version: 'baseline'
+
+input_path : "./data/baseline/input/"
+
+temporary_path: "./data/baseline/temporary/"
+
+output_path: "./data/baseline/output/"
+
+topic_info: "../input/20191007_keys.txt"
+
+eliminated_topics:
+  - 5
+  - 9
+  - 22
+  - 26
+  - 35
+  - 46
+  - 50
+  - 55
+  - 60
+
+# Classification is subjective—check before running 'topic_volume_weights.py'
+categories:
+  Religion:
+    - 4
+    - 12
+    - 52
+  Science:
+    - 7
+    - 8
+    - 41
+  Political Economy:
+    - 33
+    - 34
+    - 47
+
+half_century: true
+
+output_folder: "../output/full_sample/"
+
+bins: true
