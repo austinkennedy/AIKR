@@ -1,4 +1,5 @@
 import pandas as pd
+import gc
 
 
 def moving_shares(data, year, bins=True):
@@ -38,5 +39,8 @@ def run_shares(config):
     print(moving_average_shares.head())
     print('Exporting data')
     moving_average_shares.to_csv(config['temporary_path'] + 'moving_average_shares.csv', index=True)
+
+    del cross, metadata, ct_shares, moving_average_shares
+    gc.collect()
 
 

@@ -54,13 +54,13 @@ def run_clean_data_baseline(config):
     updated_progress = updated_progress.rename(columns={'Unnamed: 0': 'HTID', 'Main': 'percent_progress_main', 'Secondary': 'percent_progress_secondary'})
     updated_progress['HTID'] = updated_progress['HTID'].map(lambda x: x.rstrip('.txt'))
 
-    dfs = [industry, industry_pre_1643, sentiment, metadata, updated_progress]
+    sentiment_dfs = [industry, industry_pre_1643, sentiment, updated_progress]
     print('Sentiment Dimensions:' + str(sentiment.shape))
     print('Industry Dimensions:' + str(industry.shape))
     print('Updated Progress Dimensions:' + str(updated_progress.shape))
     print('Updated Industry Dimensions:' + str(industry_pre_1643.shape))
 
-    sentiment_scores_all = reduce(lambda left,right: pd.merge(left, right, on = 'HTID', how = 'inner'), dfs) #merge on volume ID
+    sentiment_scores_all = reduce(lambda left,right: pd.merge(left, right, on = 'HTID', how = 'inner'), sentiment_dfs) #merge on volume ID
 
     print('Merged Dimensions:' + str(sentiment_scores_all.shape))
 
