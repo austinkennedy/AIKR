@@ -11,12 +11,12 @@ def main_baseline():
 
     config = load_config('configs/config_baseline.yaml')
 
-    # run_clean_data(config)
-    # run_cross_topics(config)
-    # run_categories(config)
-    # run_shares(config)
-    # run_topic_volume_weights(config)
-    # run_volume_data(config)
+    run_clean_data(config)
+    run_cross_topics(config)
+    run_categories(config)
+    run_shares(config)
+    run_topic_volume_weights(config)
+    run_volume_data(config)
     run_figures(config)
 
 if __name__ == '__main__':
