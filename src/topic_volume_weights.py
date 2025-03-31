@@ -3,16 +3,7 @@ import itertools
 import numpy as np
 import pickle
 import gc
-
-
-def fix_years(df):
-    for ind,row in df.iterrows():
-        if row['Year'] > 1890:
-            df.at[ind, 'Year'] = 1890
-        elif row['Year'] < 1510:
-            df.at[ind, 'Year'] = 1510
-
-    return df
+from src.utils import fix_years
 
 def category_shares(topics, ctshares, year, categories):
     #'categories' needs to be a dict with keys as category names and values as a list of category topics, i.e. 'Category': [1,2,3]

@@ -36,9 +36,9 @@ categories:
 
 half_century: true
 
-output_folder: "../output/full_sample/"
-
 bins: true
+
+category_plots_ymax: 2500
 
 ternary_figs:
   - color: progress_original_percentile

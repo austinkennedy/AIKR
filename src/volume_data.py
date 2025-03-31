@@ -1,5 +1,6 @@
 import pandas as pd
 from functools import reduce
+from src.utils import fix_years
 import gc
 
 def get_percentile(df):
@@ -35,6 +36,7 @@ def run_volume_data(config):
     #drop NA's and duplicates
     volumes_scores = volumes_scores.dropna()
     volumes_scores = volumes_scores.drop_duplicates()
+    # volumes_scores = fix_years(volumes_scores)
 
     print('Exporting Data')
     volumes_scores.to_csv(config['temporary_path'] + 'volumes_scores.csv', index=False)
