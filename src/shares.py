@@ -24,7 +24,7 @@ def run_shares(config):
     print('Importing Data')
     cross = pd.read_parquet(config['temporary_path'] + 'cross_topics.parquet')
     metadata = pd.read_csv(config['temporary_path'] + 'metadata.csv')
-    cross = pd.merge(cross, metadata, on='HTID', how='inner')
+    cross = pd.merge(cross, metadata[['HTID', 'Year']], on='HTID', how='inner')
     
     #create sequence of years
     years=[]

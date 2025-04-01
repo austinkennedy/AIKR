@@ -1,0 +1,30 @@
+version: 'expanded_trimmed'
+
+input_path : "./data/expanded_trimmed/input/"
+
+temporary_path: "./data/expanded_trimmed/temporary/"
+
+output_path: "./data/expanded_trimmed/output/"
+
+eliminated_topics: []
+
+# Classification is subjective—check before running 'topic_volume_weights.py'
+categories:
+  Religion:
+    - 10
+    - 34
+    - 38
+  Science:
+    - 3
+    - 41
+    - 43
+  Political Economy:
+    - 13
+    - 35
+    - 36
+
+half_century: true
+
+bins: true
+
+category_plots_ymax: 2500
