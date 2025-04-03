@@ -21,3 +21,16 @@ def fix_years(df):
             df.at[ind, 'Year'] = 1510
 
     return df
+
+def create_r_config(config, config_path):
+    """Creates a config YAML file for R"""
+
+    print('Creating R config file: ' + config_path)
+
+    config['category_names'] = list(config['categories'].keys())
+
+    with open(config_path, 'w') as f:
+        yaml.dump(config, f, sort_keys=False)
+
+
+        

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import plotly.express as px
 import os
+import gc
 import statistics
 from src.utils import  make_dir
 plt.style.use('seaborn-white')
@@ -138,7 +139,7 @@ def progress_plots(avg_progress, config):
 
 
 
-def ternary_plots(data, color, filepath, legend_title, years, grayscale = False, size = None, decreasing_scale = False, show_legend = True):
+def ternary_plots(data, color, filepath, legend_title, years, categories, grayscale = False, size = None, decreasing_scale = False, show_legend = True):
     #'data' needs to be a dictionary of dataframes, with volumes as rows, and columns 'Religion', 'Political Economy', and 'Science'
     #'color': which variable color of dots will be based on
     #'path': directory to save output figures
@@ -158,11 +159,11 @@ def ternary_plots(data, color, filepath, legend_title, years, grayscale = False,
         print(year)
 
         if decreasing_scale is True:
-            df['size_percentile_r'] = 1 - df['industry_3_percentile']
+            df['size_percentile_r'] = 1 - df[s]
             size = 'size_percentile_r'
 
 
-        fig = px.scatter_ternary(df, a = 'Religion', b = 'Political Economy', c = 'Science',
+        fig = px.scatter_ternary(df, a = categories[0], b = categories[1], c = categories[2],
                                  color = color,
                                  size = size,
                                  size_max=13,
@@ -240,9 +241,12 @@ def run_figures(config):
 
     progress_plots(avg_progress, config)
 
+    categories = list(config['categories'].keys()) #extracts category names from config
+
     for fig in config['ternary_figs']:
         ternary_plots(data=moving_volumes,
                       years = half_centuries,
+                      categories=categories,
                       color=fig['color'],
                       filepath=config['output_path'] + fig['filepath'],
                       grayscale=fig['grayscale'],
@@ -251,5 +255,8 @@ def run_figures(config):
                       legend_title=fig['legend_title'],
                       show_legend=fig['show_legend']
                       )
+        
+    del volumes, moving_volumes, cat_avgs, volumes_time, avg_progress, volume_counts_by_year
+    gc.collect()
 
 
