@@ -1,6 +1,7 @@
 import pandas as pd
 from functools import reduce
 from src.utils import fix_years
+from src.constants import progress_oriented_books
 import gc
 
 def get_percentile(df):
@@ -10,6 +11,15 @@ def get_percentile(df):
             colname = column.replace('percent_', '') + '_percentile'
             data[colname] = data[column].rank(pct=True, method = 'min')
     return data
+
+def get_progress_oriented_books(df, progress_oriented_books):
+    progress_oriented_htids = set(progress_oriented_books)  # Convert to a set for faster lookup
+    # Filter the DataFrame to include only rows where 'HTID' is in the list of progress-oriented HTIDs
+    filtered_df = df[df['HTID'].isin(progress_oriented_htids)]
+    filtered_df = filtered_df[['HTID', 'Year', 'title', 'authors', 'Religion', 'Science', 'Political Economy', 'progress_main_percentile', 'industry_percentile']]
+    
+    # Return the filtered DataFrame
+    return filtered_df
 
 def run_volume_data(config):
     print('Volume Data')
@@ -52,9 +62,14 @@ def run_volume_data(config):
     # volumes_scores = fix_years(volumes_scores)
     print('Merge Dimensions after dropping duplicates:' + str(volumes_scores.shape))
 
+    #get progress-oriented books
+    progress_oriented = get_progress_oriented_books(volumes_scores, progress_oriented_books)
+
+
     print('Exporting Data')
     volumes_scores.to_csv(config['temporary_path'] + 'volumes_scores.csv', index=False)
     unmerged.to_csv(config['temporary_path'] + 'unmerged.csv', index=False)
+    progress_oriented.to_csv(config['output_path'] + 'progress_oriented_books.csv', index=False)
 
-    del volumes, scores, metadata, scores_percentiles, volumes_scores
+    del volumes, scores, metadata, scores_percentiles, volumes_scores, progress_oriented
     gc.collect()

@@ -31,6 +31,7 @@ def main_expanded_trimmed():
     # run_figures(config)
     # create_r_config(config, 'Rscripts/r_config.yaml')
     # subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
+    # subprocess.run(['Rscript', 'Rscripts/famous_books.R'])
  
     # ###########alternative corner - economics
     # config['categories'] = {
