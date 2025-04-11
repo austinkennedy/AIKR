@@ -27,48 +27,48 @@ def main_expanded_trimmed():
     # run_categories(config)
     # run_shares(config)
     # run_topic_volume_weights(config)
-    # run_volume_data(config)
+    run_volume_data(config)
     # run_figures(config)
-    create_r_config(config, 'Rscripts/r_config.yaml')
-    subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
+    # create_r_config(config, 'Rscripts/r_config.yaml')
+    # subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
  
-    ###########alternative corner - economics
-    config['categories'] = {
-        'Religion': [10,34,38],
-        'Economics': [5,45,46],
-        'Science': [3,41,43]
-    }
+    # ###########alternative corner - economics
+    # config['categories'] = {
+    #     'Religion': [10,34,38],
+    #     'Economics': [5,45,46],
+    #     'Science': [3,41,43]
+    # }
 
-    config['output_path'] = './data/alternative_corners_economics/output/'
+    # config['output_path'] = './data/alternative_corners_economics/output/'
 
-    print('Re-running for Economics')
-    rerun_corners(config)
+    # print('Re-running for Economics')
+    # rerun_corners(config)
 
-    ##########alternative corner - Law
+    # ##########alternative corner - Law
 
-    config['categories'] = {
-        'Religion': [10,34,38],
-        'Law': [6,25,58],
-        'Science': [3,41,43]
-    }
+    # config['categories'] = {
+    #     'Religion': [10,34,38],
+    #     'Law': [6,25,58],
+    #     'Science': [3,41,43]
+    # }
 
-    config['output_path'] = './data/alternative_corners_law/output/'
+    # config['output_path'] = './data/alternative_corners_law/output/'
 
-    print('Re-running for Law')
-    rerun_corners(config)
+    # print('Re-running for Law')
+    # rerun_corners(config)
 
     ############alternative corner - Literature
 
-    config['categories'] = {
-        'Religion': [10,34,38],
-        'Literature': [19,21,37],
-        'Science': [3,41,43]
-    }
+    # config['categories'] = {
+    #     'Religion': [10,34,38],
+    #     'Literature': [15,21,51],
+    #     'Science': [3,41,43]
+    # }
 
-    config['output_path'] = './data/alternative_corners_literature/output/'
+    # config['output_path'] = './data/alternative_corners_literature/output/'
 
-    print('Re-running for Literature')
-    rerun_corners(config)
+    # print('Re-running for Literature')
+    # rerun_corners(config)
 
 if __name__ == '__main__':
 

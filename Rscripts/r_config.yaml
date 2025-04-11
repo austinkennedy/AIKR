@@ -1,17 +1,17 @@
 version: expanded_trimmed
 input_path: ./data/expanded_trimmed/input/
 temporary_path: ./data/expanded_trimmed/temporary/
-output_path: ./data/alternative_corners_literature/output/
+output_path: ./data/expanded_trimmed/output/
 eliminated_topics: []
 categories:
   Religion:
   - 10
   - 34
   - 38
-  Literature:
-  - 19
-  - 21
-  - 37
+  Political Economy:
+  - 13
+  - 35
+  - 36
   Science:
   - 3
   - 41
@@ -120,5 +120,5 @@ ternary_figs:
   show_legend: true
 category_names:
 - Religion
-- Literature
+- Political Economy
 - Science

@@ -27,19 +27,34 @@ def run_volume_data(config):
     print('Getting Percentiles')
     scores_percentiles = get_percentile(scores)
 
+    # #fix some HTIDs
+    # volumes['HTID'] = volumes['HTID'].str.replace(r'[xt]$', '', regex=True)
+    # metadata['HTID'] = metadata['HTID'].str.replace(r'[xt]$', '', regex=True)
+
     print('Merging Data')
     dfs = [metadata, volumes, scores_percentiles]
     volumes_scores = reduce(lambda left,right: pd.merge(left, right, on = 'HTID', how = 'inner'), dfs) #merge on volume ID
 
+    print('Metadata Dimensions:' + str(metadata.shape))
+    print('Volumes Dimensions:' + str(volumes.shape))
+    print('Scores Dimensions:' + str(scores_percentiles.shape))
     print('Merge Dimensions:' + str(volumes_scores.shape))
 
-    #drop NA's and duplicates
-    volumes_scores = volumes_scores.dropna()
-    volumes_scores = volumes_scores.drop_duplicates()
+    #find htids that did not merge
+    missing_htids = (set(volumes['HTID']) | set(scores['HTID']) | set(metadata['HTID'])) - set(volumes_scores['HTID'])
+    unmerged = pd.DataFrame(list(missing_htids), columns=['HTID'])
+    unmerged['in_topics_data'] = unmerged['HTID'].isin(volumes['HTID'])
+    unmerged['in_sentiment_scores_data'] = unmerged['HTID'].isin(scores['HTID'])
+    unmerged['in_metadata'] = unmerged['HTID'].isin(metadata['HTID'])
+
+    #drop duplicates
+    volumes_scores = volumes_scores.drop_duplicates(subset=['HTID'])
     # volumes_scores = fix_years(volumes_scores)
+    print('Merge Dimensions after dropping duplicates:' + str(volumes_scores.shape))
 
     print('Exporting Data')
     volumes_scores.to_csv(config['temporary_path'] + 'volumes_scores.csv', index=False)
+    unmerged.to_csv(config['temporary_path'] + 'unmerged.csv', index=False)
 
     del volumes, scores, metadata, scores_percentiles, volumes_scores
     gc.collect()
