@@ -59,8 +59,6 @@ plot <- ggtern(famous_selected, aes(x = Political.Economy, y = Religion, z = Sci
   
   
 
-print(plot)
-
 path <- paste(config$output_path, 'famous_volumes.png', sep = '/')
 
 ggsave(path, plot, width = 9)
@@ -85,8 +83,6 @@ plot_gray <- ggtern(famous_selected, aes(x = Political.Economy, y = Religion, z 
   guides(color = guide_legend(byrow =TRUE, size =7),
          shape = guide_legend(byrow=TRUE, size =7))
 
-
-print(plot_gray)
 
 path_gray <- paste(config$output_path, 'famous_volumes_gray.png', sep = '/')
 
