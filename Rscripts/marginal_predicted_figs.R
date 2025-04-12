@@ -106,64 +106,6 @@ model_formula <- as.formula(paste0(
 model_marginal_predicted <- lm(model_formula, data = volumes)
 print(summary(model_marginal_predicted))
 
-#feed in column names dynamically
-get_marginal_science <- function(model, science, religion, flexible){
-  cluster = vcovCL(model, cluster = ~Year)
-
-  at <- list()
-  at[[category_science]] <- science
-  at[[category_religion]] <- religion
-  at[[category_flexible]] <- flexible
-  at[['bin']] <- bins
-
-  tmp <- model %>%
-    margins(
-      variables = paste(category_science),
-      at = at,
-      vcov = cluster
-    ) %>%
-    summary()
-  
-  return(tmp)
-}
-
-print("Calculating Marginal Effects, may take a while")
-
-s100_m <- get_marginal_science(model = model_marginal_predicted, science = 1, religion = 0, flexible = 0)
-s50r50_m <- get_marginal_science(model = model_marginal_predicted, science = 0.5, religion = 0.5, flexible = 0)
-s50f50_m <- get_marginal_science(model = model_marginal_predicted, science = 0.5, religion = 0, flexible = 0.5)
-thirds_m <- get_marginal_science(model = model_marginal_predicted, science = 1/3, religion = 1/3, flexible = 1/3)
-r50f50_m <- get_marginal_science(model = model_marginal_predicted, science = 0, religion = 0.5, flexible = 0.5)
-
-s100_m$label <- paste0("100% ", category_science)
-s50r50_m$label <- paste0("50% ", category_science, " 50% ", category_religion)
-s50f50_m$label <- paste0("50% ", category_science, " 50% ", category_flexible)
-thirds_m$label <- "1/3 Each"
-r50f50_m$label <- paste0("50% ", category_religion, " 50% ", category_flexible)
-
-s100_m$bins <- bins
-s50r50_m$bins <- bins
-s50f50_m$bins <- bins
-thirds_m$bins <- bins
-r50f50_m$bins <- bins
-
-marg <- rbind(s100_m, s50r50_m, s50f50_m, thirds_m, r50f50_m)
-
-#export/import since it takes forever
-
-write.csv(marg, paste(config$output_path, 'marginal_effects.csv', sep = ''))
-marg <- read.csv(paste(config$output_path, 'marginal_effects.csv', sep = ''))
-
-marg$bin <- as.numeric(as.character(marg$bin))
-
-marginal_fig <- ggplot(marg, aes(x = bin, y = AME, group = label)) +
-  geom_line(aes(color = label, linetype = label)) +
-  geom_ribbon(aes(y = AME, ymin = lower, ymax = upper, fill = label), alpha = 0.2) +
-  labs(title = "Marginal Effects", x = "Year", y = "Value") +
-  # scale_x_discrete(breaks = c(1600, 1700, 1800, 1900)) +
-  theme_light() +
-  theme(legend.position = "none")
-
 path <- paste(config$output_path, 'regression_figures/', sep='')
 
 
@@ -174,8 +116,6 @@ if (!dir.exists(path)){
 }else{
   print("dir exists")
 }
-
-ggsave(paste(path, '/marginal_effects.png', sep=''), width = 5.5)
 
 #Predicted Values
 bins_numeric <- as.numeric(levels(bins))
@@ -226,10 +166,3 @@ predicted_fig <- ggplot(predicted, aes(x = bin, y = fit, group = label)) +
 
 
 ggsave(paste(path, '/predicted_values.png', sep=''), width = 8)
-
-figure <- ggarrange(marginal_fig, predicted_fig,
-                    labels = c("A", "B"),
-                    ncol = 2, nrow =1,
-                    widths = c(5.5,8))
-
-ggsave(paste(path, '/marginal_predicted_combined.png', sep=''), width = 13.5)
