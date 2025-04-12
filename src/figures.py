@@ -137,6 +137,32 @@ def progress_plots(avg_progress, config):
     ax1.set_yticks([0, 0.25, 0.5, 0.75, 1])
     fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress.png', dpi = 200)
 
+def topic_ternary_plots(config, topic_shares, years, categories):
+
+    make_dir(config['output_path'] + 'topic_triangles/')
+
+    #create and export ternary plots
+    for year in years:
+        fig = px.scatter_ternary(topic_shares[year],
+                                    a = categories[0], b = categories[1], c = categories[2],
+                                    color = 'Color',
+                                    color_discrete_map = {categories[0]: 'blue', categories[1]:'red', categories[2]: 'green'},
+                                    template = 'simple_white',
+                                    symbol = "Color",
+                                    symbol_map = {categories[0]: 'cross', categories[1]: 'triangle-up', categories[2]: 'circle'})
+
+        fig.update_traces(showlegend=False, marker = {'size': 10})
+        fig.update_layout(title_text = str(year), title_font_size=30, font_size=20)
+
+        if year == 1850:
+            #add legend and adjust size for 1850
+            fig.update_traces(showlegend=True)
+            fig.update_layout(legend = dict(y=0.5), legend_title_text = 'Legend')
+            fig.write_image(config['output_path'] + 'topic_triangles/' + str(year) +'.png', width = 900)
+        else:
+            fig.write_image(config['output_path'] + 'topic_triangles/' + str(year) +'.png')
+        
+
 
 
 def ternary_plots(data, color, filepath, legend_title, years, categories, grayscale = False, size = None, decreasing_scale = False, show_legend = True):
@@ -207,7 +233,8 @@ def run_figures(config):
     print('Creating Figures')
     print('Importing Data')
     volumes = pd.read_csv(config['temporary_path'] + 'volumes_scores.csv')
-    print(len(volumes))
+    #load pickle file
+    topic_shares = pd.read_pickle(config['temporary_path'] + 'topic_shares.pickle')
 
     #create sequence of all years
     all_years = []
@@ -223,8 +250,12 @@ def run_figures(config):
     for year in range(1550,1891,50):
         half_centuries.append(year)
 
-    categories = config['categories'].keys() #extracts category names from config
+    categories = list(config['categories'].keys()) #extracts category names from config
     volumes['Category'] = volumes[categories].idxmax(axis=1) #get category of each volume
+
+    #find category for each topic, based on shares in 1850
+    for year in years:
+        topic_shares[year]['Color'] = topic_shares[1850][categories].idxmax(axis=1)
 
     #count overall volumes by year
     volume_counts_by_year = volumes.groupby('Year')['HTID'].count().reset_index()#get counts of each category by year
@@ -237,11 +268,11 @@ def run_figures(config):
 
     category_plots(volumes_time, categories, config, config['category_plots_ymax'])
 
+    topic_ternary_plots(config, topic_shares, half_centuries, categories)
+
     volume_count_plots(volume_counts_by_year, config)
 
     progress_plots(avg_progress, config)
-
-    categories = list(config['categories'].keys()) #extracts category names from config
 
     for fig in config['ternary_figs']:
         ternary_plots(data=moving_volumes,
