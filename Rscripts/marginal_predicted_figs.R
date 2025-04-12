@@ -15,6 +15,8 @@ config <- yaml.load_file('./Rscripts/r_config.yaml')
 
 volumes <- read.csv(paste(config$temporary_path, 'volumes_scores.csv', sep = '/'))
 
+output_folder <- config$output_path
+
 #Create years and bins, set global params
 years <- seq(1510, 1890, by = 1)
 min_year <- 1600
@@ -106,7 +108,7 @@ model_formula <- as.formula(paste0(
 model_marginal_predicted <- lm(model_formula, data = volumes)
 print(summary(model_marginal_predicted))
 
-path <- paste(config$output_path, 'regression_figures/', sep='')
+path <- paste(config$output_path, 'regression_figures/', progress_var, sep='')
 
 
 if (!dir.exists(path)){
@@ -166,3 +168,135 @@ predicted_fig <- ggplot(predicted, aes(x = bin, y = fit, group = label)) +
 
 
 ggsave(paste(path, '/predicted_values.png', sep=''), width = 8)
+
+##########################################Industry Predicted Figs
+
+volumes$bin <- as.factor(volumes$bin)
+
+model_formula_industry <- as.formula(paste0(
+  progress_var, " ~ ",
+  category_religion, "*",
+  category_science, "*industry_percentile*bin + ",
+  category_religion, "*",
+  category_flexible, "*industry_percentile*bin + ",
+  category_science, "*",
+  category_flexible, "*industry_percentile*bin - ",
+  category_religion, "*industry_percentile*bin + ",
+  "bin*industry_percentile + Year"
+))
+
+model_marginal_predicted_industry <- lm(model_formula_industry, data = volumes)
+print(summary(model_marginal_predicted_industry))
+
+pred_industry <- function(lm, sci, rel, flex, ind){
+  cluster = vcovCL(lm, cluster = ~Year)
+
+  data_list <- list()
+  data_list[[category_science]] <- sci
+  data_list[[category_religion]] <- rel
+  data_list[[category_flexible]] <- flex
+  data_list[["industry_percentile"]] <- ind
+  data_list[["bin"]] <- bins
+  data_list[["Year"]] <- bins_numeric
+
+  data <- as.data.frame(data_list)
+  prediction <- Predict(lm, newdata = data, interval = "confidence", se.fit =TRUE, vcov = cluster)
+  fit <- data.frame(prediction$fit)
+  return(fit)
+}
+
+
+
+s100_0 <- pred_industry(lm = model_marginal_predicted_industry, sci = 1, rel = 0, flex = 0, ind = 0)
+s50r50_0 <- pred_industry(lm = model_marginal_predicted_industry, sci = 0.5, rel = 0.5, flex = 0, ind = 0)
+s50f50_0 <- pred_industry(lm = model_marginal_predicted_industry, sci = 0.5, rel = 0, flex = 0.5, ind = 0)
+thirds_0 <- pred_industry(lm = model_marginal_predicted_industry, sci = 1/3, rel = 1/3, flex = 1/3, ind = 0)
+r50f50_0 <- pred_industry(lm = model_marginal_predicted_industry, sci = 0, rel = 0.5, flex = 0.5, ind = 0)
+
+
+s100_1 <- pred_industry(lm = model_marginal_predicted_industry, sci = 1, rel = 0, flex = 0, ind = 0.9)
+s50r50_1 <- pred_industry(lm = model_marginal_predicted_industry, sci = 0.5, rel = 0.5, flex = 0, ind = 0.9)
+s50f50_1 <- pred_industry(lm = model_marginal_predicted_industry, sci = 0.5, rel = 0, flex = 0.5, ind = 0.9)
+thirds_1 <- pred_industry(lm = model_marginal_predicted_industry, sci = 1/3, rel = 1/3, flex = 1/3, ind = 0.9)
+r50f50_1 <- pred_industry(lm = model_marginal_predicted_industry, sci = 0, rel = 0.5, flex = 0.5, ind = 0.9)
+
+s100_p$label <- paste0("100% ", category_science)
+s50r50_p$label <- paste0("50% ", category_science, " 50% ", category_religion)
+s50f50_p$label <- paste0("50% ", category_science, " 50% ", category_flexible)
+thirds_p$label <- "1/3 Each"
+r50f50_p$label <- paste0("50% ", category_religion, " 50% ", category_flexible)
+
+s100_0$label <- paste0("100% ", category_science)
+s50r50_0$label <- paste0("50% ", category_science, " 50% ", category_religion)
+s50f50_0$label <- paste0("50% ", category_science, " 50% ", category_flexible)
+thirds_0$label <- "1/3 Each"
+r50f50_0$label <- paste0("50% ", category_religion, " 50% ", category_flexible)
+
+s100_1$label <- paste0("100% ", category_science)
+s50r50_1$label <- paste0("50% ", category_science, " 50% ", category_religion)
+s50f50_1$label <- paste0("50% ", category_science, " 50% ", category_flexible)
+thirds_1$label <- "1/3 Each"
+r50f50_1$label <- paste0("50% ", category_religion, " 50% ", category_flexible)
+
+
+s100_0$bin <- bins
+s50r50_0$bin <- bins
+s50f50_0$bin <- bins
+thirds_0$bin <- bins
+r50f50_0$bin <- bins
+
+s100_1$bin <- bins
+s50r50_1$bin <- bins
+s50f50_1$bin <- bins
+thirds_1$bin <- bins
+r50f50_1$bin <- bins
+
+predicted_0 <- rbind(s100_0, s50r50_0, s50f50_0, thirds_0, r50f50_0)
+
+predicted_1 <- rbind(s100_1, s50r50_1, s50f50_1, thirds_1, r50f50_1)
+
+predicted_0$bin <- as.numeric(as.character(predicted_0$bin))
+predicted_1$bin <- as.numeric(as.character(predicted_1$bin))
+
+predicted_fig_0 <- ggplot(predicted_0, aes(x = bin, y = fit, group = label)) +
+  geom_line(aes(color = label, linetype = label)) +
+  geom_ribbon(aes(y = fit, ymin = lwr, ymax = upr, fill = label), alpha = 0.2) +
+  labs(title = "Predicted Values (Ind = 0)", x = "Year", y = "Value") +
+  # scale_y_continuous(oob=rescale_none) +
+  # ylim(-2.5, 5)+
+  coord_cartesian(ylim = c(-2.5,5)) +
+  theme_light() +
+  theme(legend.position = "none")
+
+show(predicted_fig_0)
+
+
+predicted_fig_1 <- ggplot(predicted_1, aes(x = bin, y = fit, group = label)) +
+  geom_line(aes(color = label, linetype = label)) +
+  geom_ribbon(aes(y = fit, ymin = lwr, ymax = upr, fill = label), alpha = 0.2) +
+  labs(title = "Predicted Values (Ind = 90th Percentile)", x = "Year", y = "Value") +
+  # scale_y_continuous(limits = c(-1,1), oob = rescale_none) +
+  # ylim(-2.5,5)+
+  coord_cartesian(ylim = c(-2.5,5)) +
+  theme_light()
+
+show(predicted_fig_1)
+
+figure <- ggarrange(predicted_fig_0, predicted_fig_1,
+                    labels = c("A", "B"),
+                    ncol = 2, nrow =1,
+                    widths = c(5.5,8))
+show(figure)
+
+path <- paste(output_folder, 'regression_figures/industry_percentile', sep='')
+
+if (!dir.exists(path)){
+  dir.create(path, recursive = TRUE)
+  
+  print('directory created')
+}else{
+  print("dir exists")
+}
+
+ggsave(paste(path, '/predicted_values.png', sep =''), width = 13.5)
+

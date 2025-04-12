@@ -30,9 +30,10 @@ def main_expanded_trimmed():
     # run_volume_data(config)
     # run_figures(config)
     # create_r_config(config, 'Rscripts/r_config.yaml')
+    subprocess.run(['Rscript', 'Rscripts/regression_tables.R'])
     # subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
     # subprocess.run(['Rscript', 'Rscripts/famous_books.R'])
-    subprocess.run(['Rscript', 'Rscripts/additional_ternary_figs.R'])
+    # subprocess.run(['Rscript', 'Rscripts/additional_ternary_figs.R'])
  
     # ###########alternative corner - economics
     # config['categories'] = {
