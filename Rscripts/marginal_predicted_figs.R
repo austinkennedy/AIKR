@@ -19,7 +19,7 @@ output_folder <- config$output_path
 
 #Create years and bins, set global params
 years <- seq(1510, 1890, by = 1)
-min_year <- 1600
+min_year <- config$min_regression_year
 interval <- 50
 bins <- seq(min_year + (interval/2), 1900 - (interval/2), by = interval)
 
@@ -63,8 +63,9 @@ if (category_flexible == 'Political Economy') {
 
 print(names(volumes))
 
-progress_var <- 'progress_main_percentile'
+progress_vars <- list('progress_main_percentile', 'progress_original_percentile', 'progress_secondary_percentile')
 
+for (progress_var in progress_vars){
 # model <- feols(
 #     .[progress_var] ~
 #     .[category_science] +
@@ -169,12 +170,14 @@ predicted_fig <- ggplot(predicted, aes(x = bin, y = fit, group = label)) +
 
 ggsave(paste(path, '/predicted_values.png', sep=''), width = 8)
 
+}
+
 ##########################################Industry Predicted Figs
 
 volumes$bin <- as.factor(volumes$bin)
 
 model_formula_industry <- as.formula(paste0(
-  progress_var, " ~ ",
+  'progress_main_percentile', " ~ ",
   category_religion, "*",
   category_science, "*industry_percentile*bin + ",
   category_religion, "*",

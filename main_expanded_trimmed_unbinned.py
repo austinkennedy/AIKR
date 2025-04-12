@@ -20,13 +20,15 @@ def main_expanded_trimmed_unbinned():
 
     config['bins'] = False
 
-    # run_clean_data(config)
-    # run_cross_topics(config)
-    # run_categories(config)
-    # run_shares(config)
-    # run_topic_volume_weights(config)
+    run_clean_data(config)
+    run_cross_topics(config)
+    run_categories(config)
+    run_shares(config)
+    run_topic_volume_weights(config)
     run_volume_data(config)
-    # run_figures(config)
-    # create_r_config(config, 'Rscripts/r_config.yaml')
-    # subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
-    # subprocess.run(['Rscript', 'Rscripts/famous_books.R'])
+    run_figures(config)
+    create_r_config(config, 'Rscripts/r_config.yaml')
+    subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
+
+if __name__ == "__main__":
+    main_expanded_trimmed_unbinned()

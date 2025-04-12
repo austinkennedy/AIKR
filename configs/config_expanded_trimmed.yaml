@@ -29,6 +29,7 @@ bins: true
 
 category_plots_ymax: 2500
 
+min_regression_year: 1600
 
 ternary_figs:
   - color: progress_original_percentile

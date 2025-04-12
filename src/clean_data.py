@@ -2,6 +2,7 @@ import pandas as pd
 import pickle
 import gc
 from functools import reduce
+from src.utils import make_dir
 
 
 def clean_htids_topic_numbers(data, string_identifier):
@@ -96,9 +97,6 @@ def run_clean_data_expanded_trimmed(config):
 
     sentiment = sentiment.rename(columns = {'Unnamed: 0': 'HTID', 'Regression': 'percent_regression', 'Pessimism': 'percent_pessimism', 'Optimism':'percent_optimistic', 'Progress': 'percent_progress_original'})
     sentiment['HTID'] = sentiment['HTID'].map(lambda x: x.rstrip('.txt')) #remove '.txt' at the end of each string for HTIDs
-    #NEED TO CHANGE IF YOU WANT TO INCORPORATE DIFFERENT PROGRESS SCORES
-    sentiment['optimism_score'] = sentiment['percent_optimistic'] + sentiment['percent_progress_original'] - sentiment['percent_pessimism'] - sentiment['percent_regression']
-
 
     updated_progress = updated_progress.rename(columns={'Unnamed: 0': 'HTID', 'Main': 'percent_progress_main', 'Progress': 'percent_progress_secondary'})
     updated_progress['HTID'] = updated_progress['HTID'].map(lambda x: x.rstrip('.txt'))
@@ -132,6 +130,11 @@ def run_clean_data_expanded_trimmed(config):
 
 
 def run_clean_data(config):
+
+    #make directories if they don't exist
+    make_dir(config['temporary_path'])
+    make_dir(config['output_path'])
+
 
     if config['version'] == 'baseline':
         run_clean_data_baseline(config)

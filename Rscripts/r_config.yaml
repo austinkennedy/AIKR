@@ -1,7 +1,7 @@
 version: expanded_trimmed
 input_path: ./data/expanded_trimmed/input/
 temporary_path: ./data/expanded_trimmed/temporary/
-output_path: ./data/expanded_trimmed/output/
+output_path: ./data/expanded_trimmed/output/drop_1650/
 eliminated_topics: []
 categories:
   Religion:
@@ -19,6 +19,7 @@ categories:
 half_century: true
 bins: true
 category_plots_ymax: 2500
+min_regression_year: 1650
 ternary_figs:
 - color: progress_original_percentile
   legend_title: Progress (Percentile)
