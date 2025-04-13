@@ -94,8 +94,8 @@ def category_plots(volumes_time, categories, config, ymax):
     for category in categories:
         df = volumes_time[category]
         fig, (ax1) = plt.subplots(1,1)
-        colors = ['b', 'g', 'r']
-        lines = ['dashdot', 'dashed', 'dotted']
+        colors = ['b', 'r', 'g']
+        lines = ['dashdot', 'dotted', 'dashed']
         for i, cat in enumerate(categories):
             ax1.plot(df['Year'], df[cat], label = cat, color = colors[i], linestyle = lines[i])
         
@@ -114,9 +114,9 @@ def category_plots(volumes_time, categories, config, ymax):
 def category_averages_translations(cat_avgs, cat_avgs_transl, config, categories):
     
     fig, (ax1) = plt.subplots(1,1, figsize=(9,6))
-    colors = ['b', 'g', 'r']
-    lines_non_transl = ['solid', 'dashdot', 'dotted']
-    lines_transl = ['dashed', (0, (3,5,1,5)), (0, (1,1))]
+    colors = ['b', 'r', 'g']
+    lines_non_transl = ['solid', 'dotted', 'dashdot']
+    lines_transl = ['dashed', (0, (1,1)), (0, (3,5,1,5))]
 
     for i, cat in enumerate(categories):
         ax1.plot(cat_avgs['Year'], cat_avgs[cat], label = cat, color = colors[i], linestyle = lines_non_transl[i])
@@ -182,7 +182,14 @@ def progress_plots(avg_progress, config, translations = False, avg_progress_tran
 
 def topic_ternary_plots(config, topic_shares, years, categories):
 
-    make_dir(config['output_path'] + 'topic_triangles/')
+    make_dir(config['output_path'] + 'topic_triangles/color/')
+    make_dir(config['output_path'] + 'topic_triangles/grayscale/')
+
+    gray_map = {
+        categories[0]: 'rgb(120, 120, 120)',
+        categories[1]: 'rgb(180, 180, 180)',
+        categories[2]: 'rgb(60, 60, 60)'
+    }
 
     #create and export ternary plots
     for year in years:
@@ -198,13 +205,17 @@ def topic_ternary_plots(config, topic_shares, years, categories):
         fig.update_layout(title_text = str(year), title_font_size=30, font_size=20)
 
         if year == 1850:
-            #add legend and adjust size for 1850
             fig.update_traces(showlegend=True)
             fig.update_layout(legend = dict(y=0.5), legend_title_text = 'Legend')
-            fig.write_image(config['output_path'] + 'topic_triangles/' + str(year) +'.png', width = 900)
-        else:
-            fig.write_image(config['output_path'] + 'topic_triangles/' + str(year) +'.png')
-        
+
+        fig.write_image(config['output_path'] + 'topic_triangles/color/' + str(year) +'.png', width = 900)
+
+        for trace in fig.data:
+            cat = trace.name
+            if cat in gray_map:
+                trace.marker.color = gray_map[cat]
+
+        fig.write_image(config['output_path'] + 'topic_triangles/grayscale/' + str(year) +'.png', width = 900)
 
 
 

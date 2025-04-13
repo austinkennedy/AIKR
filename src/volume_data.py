@@ -62,14 +62,16 @@ def run_volume_data(config):
     # volumes_scores = fix_years(volumes_scores)
     print('Merge Dimensions after dropping duplicates:' + str(volumes_scores.shape))
 
-    #get progress-oriented books
-    progress_oriented = get_progress_oriented_books(volumes_scores, progress_oriented_books)
+    #get progress-oriented books, but avoid error when calculating alternative corners
+    if 'Political Economy' in volumes_scores.columns:
+        progress_oriented = get_progress_oriented_books(volumes_scores, progress_oriented_books)
+        progress_oriented.to_csv(config['output_path'] + 'progress_oriented_books.csv', index=False)
+        del progress_oriented
 
 
     print('Exporting Data')
     volumes_scores.to_csv(config['temporary_path'] + 'volumes_scores.csv', index=False)
     unmerged.to_csv(config['temporary_path'] + 'unmerged.csv', index=False)
-    progress_oriented.to_csv(config['output_path'] + 'progress_oriented_books.csv', index=False)
 
-    del volumes, scores, metadata, scores_percentiles, volumes_scores, progress_oriented
+    del volumes, scores, metadata, scores_percentiles, volumes_scores, unmerged
     gc.collect()

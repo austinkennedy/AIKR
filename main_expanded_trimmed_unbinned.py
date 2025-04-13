@@ -29,6 +29,14 @@ def main_expanded_trimmed_unbinned():
     run_figures(config)
     create_r_config(config, 'Rscripts/r_config.yaml')
     subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
+    subprocess.run(['Rscript', 'Rscripts/additional_ternary_figs.R'])
+
+    # re-run predicted figures dropping obs before 1650
+
+    config['min_regression_year'] = 1650
+    config['output_path'] = './data/expanded_trimmed_unbinned/output/drop_1650/'
+    create_r_config(config, 'Rscripts/r_config.yaml')
+    subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
 
 if __name__ == "__main__":
     main_expanded_trimmed_unbinned()
