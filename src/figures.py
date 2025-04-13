@@ -37,8 +37,10 @@ def calculate_summary_data(volumes, years, categories, config):
     
     volumes_time = {cat: [] for cat in categories}
     cat_avgs = {}
+    cat_avgs_transl = {}
     moving_volumes = {}
     avg_progress = {}
+    avg_progress_transl = {}
 
     for year in years:
         
@@ -47,16 +49,24 @@ def calculate_summary_data(volumes, years, categories, config):
         else:
             df = volumes[volumes['Year'] == year]
 
+        df_transl = df[df['translation'] == 1] #get only translated volumes
+
         for category in categories:
             volumes_time[category].append(category_averages_by_year(df, year, category, categories))
 
         cat_avgs[year] = category_averages_overall(df, year, categories)
+        cat_avgs_transl[year] = category_averages_overall(df_transl, year, categories)
         moving_volumes[year] = df.copy()
 
         if len(volumes[volumes['Year'] == year]) != 0:
             avg_progress[year] = statistics.mean(volumes[volumes['Year'] == year]['progress_main_percentile'])
         else:
             avg_progress[year] = np.nan
+
+        if len(df_transl) > 0:
+            avg_progress_transl[year] = statistics.mean(df_transl['progress_main_percentile'])
+        else:
+            avg_progress_transl[year] = np.nan
 
 
 
@@ -68,11 +78,15 @@ def calculate_summary_data(volumes, years, categories, config):
         volumes_time[category]['Volumes_rolling'] = volumes_time[category]['Volumes'].rolling(window=20, min_periods=1, center = True).mean() #rolling average of volumes
 
     cat_avgs = pd.concat(cat_avgs).reset_index(drop=True)
+    cat_avgs_transl = pd.concat(cat_avgs_transl).reset_index(drop=True)
 
     avg_progress = pd.DataFrame.from_dict(avg_progress, orient='index').reset_index()
     avg_progress.columns = ['Year', 'avg_progress']
 
-    return moving_volumes, cat_avgs, volumes_time, avg_progress
+    avg_progress_transl = pd.DataFrame.from_dict(avg_progress_transl, orient='index').reset_index()
+    avg_progress_transl.columns = ['Year', 'avg_progress']
+
+    return moving_volumes, cat_avgs, cat_avgs_transl, volumes_time, avg_progress, avg_progress_transl
 
 
 def category_plots(volumes_time, categories, config, ymax):
@@ -97,6 +111,21 @@ def category_plots(volumes_time, categories, config, ymax):
 
         fig.savefig(config['output_path'] + 'volumes_over_time/' + category + '.png', dpi = 200)
 
+def category_averages_translations(cat_avgs, cat_avgs_transl, config, categories):
+    
+    fig, (ax1) = plt.subplots(1,1, figsize=(9,6))
+    colors = ['b', 'g', 'r']
+    lines_non_transl = ['solid', 'dashdot', 'dotted']
+    lines_transl = ['dashed', (0, (3,5,1,5)), (0, (1,1))]
+
+    for i, cat in enumerate(categories):
+        ax1.plot(cat_avgs['Year'], cat_avgs[cat], label = cat, color = colors[i], linestyle = lines_non_transl[i])
+        ax1.plot(cat_avgs_transl['Year'], cat_avgs_transl[cat], label = cat + ' (Translations)', color = colors[i], linestyle = lines_transl[i])
+    plt.legend(loc= 'upper center', ncol = 3)
+    plt.ylim([0,1])
+
+    fig.savefig(config['output_path'] + 'volumes_over_time/corpus_vs_transl_categories.png', dpi=200)
+
 
 def volume_count_plots(volume_counts_by_year, config):
 
@@ -117,25 +146,39 @@ def volume_count_plots(volume_counts_by_year, config):
     ax1.set_xlabel('Year')
     fig.savefig(config['output_path'] + 'volumes_over_time/' + 'total_volumes.png', dpi = 200)
 
-def progress_plots(avg_progress, config):
+def progress_plots(avg_progress, config, translations = False, avg_progress_transl = None):
     df = avg_progress.copy()
     df['avg_progress_rolling'] = df['avg_progress'].rolling(window=20, min_periods=1, center = True).mean() #rolling average of volumes
+
+    if avg_progress_transl is not None:
+        df_transl = avg_progress_transl.copy()
+        df_transl['avg_progress_rolling'] = df_transl['avg_progress'].rolling(window=20, min_periods=1, center = True).mean()
 
     #raw values plot
     fig, (ax1) = plt.subplots(1,1)
     ax1.plot(df['Year'], df['avg_progress'], label = 'Average Progress Score (Percentile)', color = 'crimson', linestyle = 'solid')
+    if translations:
+        ax1.plot(df['Year'], avg_progress_transl['avg_progress'], label = 'Average Progress Score (Translations)', color = 'crimson', linestyle = 'dashed')
     ax1.legend(loc = 'upper right')
     ax1.set_xlabel('Year')
     ax1.set_yticks([0, 0.25, 0.5, 0.75, 1])
-    fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress_raw.png', dpi = 200)
+    if translations:
+        fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress_translations_raw.png', dpi = 200)
+    else:
+        fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress_raw.png', dpi = 200)
 
     #rolling average plot
     fig, (ax1) = plt.subplots(1,1)
     ax1.plot(df['Year'], df['avg_progress_rolling'], label = 'Average Progress Score (Percentile)', color = 'crimson', linestyle = 'solid')
+    if translations:
+        ax1.plot(df['Year'], df_transl['avg_progress_rolling'], label = 'Average Progress Score (Translations)', color = 'crimson', linestyle = 'dashed')
     ax1.legend(loc = 'upper right')
     ax1.set_xlabel('Year')
     ax1.set_yticks([0, 0.25, 0.5, 0.75, 1])
-    fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress.png', dpi = 200)
+    if translations:
+        fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress_translations.png', dpi = 200)
+    else:
+        fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress.png', dpi = 200)
 
 def topic_ternary_plots(config, topic_shares, years, categories):
 
@@ -262,17 +305,19 @@ def run_figures(config):
     #fill missing years with 0
     volume_counts_by_year = volume_counts_by_year.set_index('Year').reindex(all_years, fill_value=0).reset_index().rename(columns={'HTID': 'Count'})
 
-    moving_volumes, cat_avgs, volumes_time, avg_progress = calculate_summary_data(volumes, years, categories, config)
+    moving_volumes, cat_avgs, cat_avgs_transl, volumes_time, avg_progress, avg_progress_transl = calculate_summary_data(volumes, years, categories, config)
 
     make_dir(config['output_path'] + 'volumes_over_time/')
 
     category_plots(volumes_time, categories, config, config['category_plots_ymax'])
+    category_averages_translations(cat_avgs, cat_avgs_transl, config, categories)
 
     topic_ternary_plots(config, topic_shares, half_centuries, categories)
 
     volume_count_plots(volume_counts_by_year, config)
 
     progress_plots(avg_progress, config)
+    progress_plots(avg_progress, config, translations = True, avg_progress_transl = avg_progress_transl)
 
     for fig in config['ternary_figs']:
         ternary_plots(data=moving_volumes,

@@ -27,20 +27,20 @@ def main_expanded_trimmed():
     # run_categories(config)
     # run_shares(config)
     # run_topic_volume_weights(config)
-    # run_volume_data(config)
-    # run_figures(config)
-    create_r_config(config, 'Rscripts/r_config.yaml')
+    run_volume_data(config)
+    run_figures(config)
+    # create_r_config(config, 'Rscripts/r_config.yaml')
     # subprocess.run(['Rscript', 'Rscripts/regression_tables.R'])
-    subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
+    # subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
     # subprocess.run(['Rscript', 'Rscripts/famous_books.R'])
     # subprocess.run(['Rscript', 'Rscripts/additional_ternary_figs.R'])
 
     #re-run predicted figures dropping obs before 1650
 
-    config['min_regression_year'] = 1650
-    config['output_path'] = './data/expanded_trimmed/output/drop_1650/'
-    create_r_config(config, 'Rscripts/r_config.yaml')
-    subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
+    # config['min_regression_year'] = 1650
+    # config['output_path'] = './data/expanded_trimmed/output/drop_1650/'
+    # create_r_config(config, 'Rscripts/r_config.yaml')
+    # subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
  
     # ###########alternative corner - economics
     # config['categories'] = {

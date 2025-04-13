@@ -94,6 +94,9 @@ def run_clean_data_expanded_trimmed(config):
     metadata['Year_rounded'] = pd.to_numeric(metadata['Year'])
     metadata['Year'] = pd.to_numeric(metadata['Year'], downcast='signed')
     metadata['HTID'] = metadata.apply(fix_htid, axis=1)
+    translations = pd.read_csv(config['input_path'] + 'translations.csv')
+    translations['HTID'] = translations.apply(fix_htid, axis=1)
+    metadata = metadata.merge(translations, on= 'HTID', how = 'left')
 
     sentiment = sentiment.rename(columns = {'Unnamed: 0': 'HTID', 'Regression': 'percent_regression', 'Pessimism': 'percent_pessimism', 'Optimism':'percent_optimistic', 'Progress': 'percent_progress_original'})
     sentiment['HTID'] = sentiment['HTID'].map(lambda x: x.rstrip('.txt')) #remove '.txt' at the end of each string for HTIDs
