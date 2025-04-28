@@ -137,6 +137,8 @@ def volume_count_plots(volume_counts_by_year, config):
     ax1.plot(df['Year'], df['Count'], label = 'Volume Count', color = 'darkblue', linestyle = 'solid')
     ax1.legend(loc = 'upper right')
     ax1.set_xlabel('Year')
+    #move legend to the upper left corner
+    ax1.legend(loc = 'upper left')
     fig.savefig(config['output_path'] + 'volumes_over_time/' + 'total_volumes_raw.png', dpi = 200)
 
     #rolling average plot
@@ -144,6 +146,7 @@ def volume_count_plots(volume_counts_by_year, config):
     ax1.plot(df['Year'], df['Count_rolling'], label = 'Volume Count', color = 'darkblue', linestyle = 'solid')
     ax1.legend(loc = 'upper right')
     ax1.set_xlabel('Year')
+    ax1.legend(loc = 'upper left')
     fig.savefig(config['output_path'] + 'volumes_over_time/' + 'total_volumes.png', dpi = 200)
 
 def progress_plots(avg_progress, config, translations = False, avg_progress_transl = None):
@@ -287,12 +290,14 @@ def run_figures(config):
     print('Creating Figures')
     print('Importing Data')
     volumes = pd.read_csv(config['temporary_path'] + 'volumes_scores.csv')
+    metadata = pd.read_csv(config['temporary_path'] + 'metadata.csv')
     #load pickle file
     topic_shares = pd.read_pickle(config['temporary_path'] + 'topic_shares.pickle')
 
+
     #create sequence of all years
     all_years = []
-    for year in range(1500,1900):
+    for year in range(1500,1901):
         all_years.append(year)
 
     #create sequence of years
@@ -312,7 +317,7 @@ def run_figures(config):
         topic_shares[year]['Color'] = topic_shares[1850][categories].idxmax(axis=1)
 
     #count overall volumes by year
-    volume_counts_by_year = volumes.groupby('Year')['HTID'].count().reset_index()#get counts of each category by year
+    volume_counts_by_year = metadata.groupby('Year')['HTID'].count().reset_index()#get counts of each category by year
     #fill missing years with 0
     volume_counts_by_year = volume_counts_by_year.set_index('Year').reindex(all_years, fill_value=0).reset_index().rename(columns={'HTID': 'Count'})
 

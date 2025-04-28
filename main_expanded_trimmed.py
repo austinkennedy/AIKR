@@ -22,64 +22,64 @@ def main_expanded_trimmed():
 
     config = load_config('configs/config_expanded_trimmed.yaml')
 
-    run_clean_data(config)
-    run_cross_topics(config)
-    run_categories(config)
-    run_shares(config)
-    run_topic_volume_weights(config)
-    run_volume_data(config)
+    # run_clean_data(config)
+    # run_cross_topics(config)
+    # run_categories(config)
+    # run_shares(config)
+    # run_topic_volume_weights(config)
+    # run_volume_data(config)
     run_figures(config)
-    create_r_config(config, 'Rscripts/r_config.yaml')
-    subprocess.run(['Rscript', 'Rscripts/regression_tables.R'])
-    subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
-    subprocess.run(['Rscript', 'Rscripts/famous_books.R'])
-    subprocess.run(['Rscript', 'Rscripts/additional_ternary_figs.R'])
+    # create_r_config(config, 'Rscripts/r_config.yaml')
+    # subprocess.run(['Rscript', 'Rscripts/regression_tables.R'])
+    # subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
+    # subprocess.run(['Rscript', 'Rscripts/famous_books.R'])
+    # subprocess.run(['Rscript', 'Rscripts/additional_ternary_figs.R'])
 
-    # re-run predicted figures dropping obs before 1650
+    # # re-run predicted figures dropping obs before 1650
 
-    config['min_regression_year'] = 1650
-    config['output_path'] = './data/expanded_trimmed/output/drop_1650/'
-    create_r_config(config, 'Rscripts/r_config.yaml')
-    subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
-    config['min_regression_year'] = 1600
+    # config['min_regression_year'] = 1650
+    # config['output_path'] = './data/expanded_trimmed/output/drop_1650/'
+    # create_r_config(config, 'Rscripts/r_config.yaml')
+    # subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
+    # config['min_regression_year'] = 1600
  
-    ###########alternative corner - economics
-    config['categories'] = {
-        'Religion': [10,34,38],
-        'Economics': [5,45,46],
-        'Science': [3,41,43]
-    }
+    # ###########alternative corner - economics
+    # config['categories'] = {
+    #     'Religion': [10,34,38],
+    #     'Economics': [5,45,46],
+    #     'Science': [3,41,43]
+    # }
 
-    config['output_path'] = './data/alternative_corners_economics/output/'
+    # config['output_path'] = './data/alternative_corners_economics/output/'
 
-    print('Re-running for Economics')
-    rerun_corners(config)
+    # print('Re-running for Economics')
+    # rerun_corners(config)
 
-    ##########alternative corner - Law
+    # ##########alternative corner - Law
 
-    config['categories'] = {
-        'Religion': [10,34,38],
-        'Law': [6,25,58],
-        'Science': [3,41,43]
-    }
+    # config['categories'] = {
+    #     'Religion': [10,34,38],
+    #     'Law': [6,25,58],
+    #     'Science': [3,41,43]
+    # }
 
-    config['output_path'] = './data/alternative_corners_law/output/'
+    # config['output_path'] = './data/alternative_corners_law/output/'
 
-    print('Re-running for Law')
-    rerun_corners(config)
+    # print('Re-running for Law')
+    # rerun_corners(config)
 
-    ###########alternative corner - Literature
+    # ###########alternative corner - Literature
 
-    config['categories'] = {
-        'Religion': [10,34,38],
-        'Literature': [15,21,51],
-        'Science': [3,41,43]
-    }
+    # config['categories'] = {
+    #     'Religion': [10,34,38],
+    #     'Literature': [15,21,51],
+    #     'Science': [3,41,43]
+    # }
 
-    config['output_path'] = './data/alternative_corners_literature/output/'
+    # config['output_path'] = './data/alternative_corners_literature/output/'
 
-    print('Re-running for Literature')
-    rerun_corners(config)
+    # print('Re-running for Literature')
+    # rerun_corners(config)
 
 if __name__ == '__main__':
 

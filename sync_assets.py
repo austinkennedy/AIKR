@@ -6,7 +6,7 @@ EXPANDED_TRIMMED_UNBINNED_PATH = './data/expanded_trimmed_unbinned/output/'
 ECONOMICS_PATH = './data/alternative_corners_economics/output/'
 LITERATURE_PATH = './data/alternative_corners_literature/output/'
 LAW_PATH = './data/alternative_corners_law/output/'
-DEST_DIR = 'paper_assets/'
+DEST_DIR = './data/paper_assets/'
 
 mapping = {
     os.path.join(EXPANDED_TRIMMED_PATH, 'volumes_over_time/total_volumes_raw.png'): 'fig_1',
@@ -44,7 +44,8 @@ mapping = {
     os.path.join(ECONOMICS_PATH, 'volume_triangles/progress_main/grayscale'): 'fig_b_17',
     os.path.join(LAW_PATH, 'volume_triangles/progress_main/grayscale'): 'fig_b_18',
     os.path.join(LITERATURE_PATH, 'volume_triangles/progress_main/grayscale'): 'fig_b_19',
-#    os.path.join(EXPANDED_TRIMMED_PATH, 'regression_figures/industry_post1643_percentile/predicted_values.png'): 'fig_b_20',
+    os.path.join(EXPANDED_TRIMMED_PATH, 'volume_triangles/industry_full_dict/grayscale'): 'fig_b_20/grayscale',
+    os.path.join(EXPANDED_TRIMMED_PATH, 'volume_triangles/industry_full_dict/color'): 'fig_b_20/color',
     os.path.join(EXPANDED_TRIMMED_PATH, 'volume_triangles/industry/color'): 'fig_b_21',
     os.path.join(EXPANDED_TRIMMED_PATH, 'drop_1650/regression_figures/industry_percentile/predicted_values.png'): 'fig_b_22',
     os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'topic_triangles/grayscale'): 'fig_e_1',

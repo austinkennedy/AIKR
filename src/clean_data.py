@@ -10,8 +10,9 @@ def clean_htids_topic_numbers(data, string_identifier):
 
     df = data.copy()
     df.drop(columns=0, inplace=True)
-    df[1] = [string[string.rfind(string_identifier)+str_length:-4] for string in df[1]]
+    df[1] = df[1].str.split('/').str[-1].str.strip("'")
     df.columns = ['HTID'] + [i for i in range(1,len(df.columns))]
+    df['HTID'] = df['HTID'].str.replace('.txt', '')
     return df
 
 def fix_htid(row):
@@ -46,14 +47,14 @@ def run_clean_data_baseline(config):
 
     industry = industry.rename(columns={'Unnamed: 0': 'HTID', '2-vote':'industry_2','3-vote':'industry_3'})
     industry_pre_1643 = industry_pre_1643.rename(columns={'Industrial Scores (May 24)': 'industry_1643'})
-    industry['HTID'] = industry['HTID'].map(lambda x: x.rstrip('.txt'))#remove '.txt' at the end of each string for HTIDs
-    industry_pre_1643['HTID'] = industry_pre_1643['HTID'].map(lambda x: x.rstrip('.txt'))#remove '.txt' at the end of each string for HTIDs
+    industry['HTID'] = industry['HTID'].map(lambda x: x.replace('.txt', ''))#remove '.txt' at the end of each string for HTIDs
+    industry_pre_1643['HTID'] = industry_pre_1643['HTID'].map(lambda x: x.replace('.txt', ''))#remove '.txt' at the end of each string for HTIDs
     sentiment = sentiment.rename(columns = {'Unnamed: 0': 'HTID', 'Regression': 'percent_regression', 'Pessimism': 'percent_pessimism', 'Optimism':'percent_optimistic', 'Progress': 'percent_progress_original'})
-    sentiment['HTID'] = sentiment['HTID'].map(lambda x: x.rstrip('.txt')) #remove '.txt' at the end of each string for HTIDs
+    sentiment['HTID'] = sentiment['HTID'].map(lambda x: x.replace('.txt', '')) #remove '.txt' at the end of each string for HTIDs
     #NEED TO CHANGE IF YOU WANT TO INCORPORATE DIFFERENT PROGRESS SCORES
     sentiment['optimism_score'] = sentiment['percent_optimistic'] + sentiment['percent_progress_original'] - sentiment['percent_pessimism'] - sentiment['percent_regression']
     updated_progress = updated_progress.rename(columns={'Unnamed: 0': 'HTID', 'Main': 'percent_progress_main', 'Secondary': 'percent_progress_secondary'})
-    updated_progress['HTID'] = updated_progress['HTID'].map(lambda x: x.rstrip('.txt'))
+    updated_progress['HTID'] = updated_progress['HTID'].map(lambda x: x.replace('.txt', ''))
 
     sentiment_dfs = [industry, industry_pre_1643, sentiment, updated_progress]
     print('Sentiment Dimensions:' + str(sentiment.shape))
@@ -76,12 +77,13 @@ def run_clean_data_baseline(config):
 
 def run_clean_data_expanded_trimmed(config):
     print('Importing Data')
-    topic_data = pd.read_csv(config['input_path'] + 'LDA_01_topics.txt', sep = '\t', lineterminator = '\n', header = None)
-    topic_keys = pd.read_csv(config['input_path'] + 'LDA_01_keys.txt', sep = '\t', lineterminator='\n', header=None)
+    topic_data = pd.read_csv(config['input_path'] + 'LDA_01_topics.txt', sep = '\t', header = None)
+    topic_keys = pd.read_csv(config['input_path'] + 'LDA_01_keys.txt', sep = '\t', header=None)
     metadata = pd.read_csv(config['input_path'] + 'metadata_march25.csv')
     sentiment = pd.read_csv(config['input_path'] + 'sentiment_results_march25.csv')
     updated_progress = pd.read_csv(config['input_path'] + 'updated_progress_scores_march25.csv')
     industry = pd.read_csv(config['input_path'] + 'industry_scores_jan2025.csv')
+    industry_scores_full_dict = pd.read_csv(config['input_path'] + 'industry_scores_full_dict.csv')
 
     topic_data_cleaned = clean_htids_topic_numbers(data = topic_data, string_identifier='/Cleaned_Nov2024/')
 
@@ -99,15 +101,18 @@ def run_clean_data_expanded_trimmed(config):
     metadata = metadata.merge(translations, on= 'HTID', how = 'left')
 
     sentiment = sentiment.rename(columns = {'Unnamed: 0': 'HTID', 'Regression': 'percent_regression', 'Pessimism': 'percent_pessimism', 'Optimism':'percent_optimistic', 'Progress': 'percent_progress_original'})
-    sentiment['HTID'] = sentiment['HTID'].map(lambda x: x.rstrip('.txt')) #remove '.txt' at the end of each string for HTIDs
+    sentiment['HTID'] = sentiment['HTID'].map(lambda x: x.replace('.txt', '')) #remove '.txt' at the end of each string for HTIDs
 
     updated_progress = updated_progress.rename(columns={'Unnamed: 0': 'HTID', 'Main': 'percent_progress_main', 'Progress': 'percent_progress_secondary'})
-    updated_progress['HTID'] = updated_progress['HTID'].map(lambda x: x.rstrip('.txt'))
+    updated_progress['HTID'] = updated_progress['HTID'].map(lambda x: x.replace('.txt', ''))
 
     industry = industry.rename(columns={'Unnamed: 0': 'HTID', 'Industrial Scores (June 23)':'industry'})
-    industry['HTID'] = industry['HTID'].map(lambda x: x.rstrip('.txt'))#remove '.txt' at the end of each string for HTIDs
+    industry['HTID'] = industry['HTID'].map(lambda x: x.replace('.txt', ''))#remove '.txt' at the end of each string for HTIDs
 
-    sentiment_dfs = [industry, sentiment, updated_progress]
+    industry_scores_full_dict = industry_scores_full_dict.rename(columns={'Unnamed: 0': 'HTID', 'Industrial Scores (All words)':'industry_full_dict'})
+    industry_scores_full_dict['HTID'] = industry_scores_full_dict['HTID'].map(lambda x: x.replace('.txt', ''))#remove '.txt' at the end of each string for HTIDs
+
+    sentiment_dfs = [industry, industry_scores_full_dict, sentiment, updated_progress]
 
     print('Sentiment Dimensions:' + str(sentiment.shape))
     print('Industry Dimensions:' + str(industry.shape))
@@ -115,11 +120,9 @@ def run_clean_data_expanded_trimmed(config):
 
     sentiment_scores_all = reduce(lambda left,right: pd.merge(left, right, on = 'HTID', how = 'inner'), sentiment_dfs) #merge on volume ID
 
-    print('Merged Dimensions:' + str(sentiment_scores_all.shape))
+    sentiment_scores_all.fillna(0, inplace=True) #fill NA values with 0, for a few novels without words.
 
-    #drop NAs
-    topic_data_cleaned = topic_data_cleaned.dropna()
-    sentiment_scores_all = sentiment_scores_all.dropna()
+    print('Merged Dimensions:' + str(sentiment_scores_all.shape))
 
     print('Exporting Data')
     topic_data_cleaned.to_csv(config['temporary_path'] + 'topic_weights.csv', index = False)
