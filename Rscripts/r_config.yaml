@@ -119,6 +119,20 @@ ternary_figs:
   size: null
   decreasing_scale: false
   show_legend: true
+- color: industry_full_dict_percentile
+  legend_title: Industry (Percentile)
+  filepath: volume_triangles/industry_full_dict/color/
+  grayscale: false
+  size: null
+  decreasing_scale: false
+  show_legend: true
+- color: industry_full_dict_percentile
+  legend_title: Industry (Percentile)
+  filepath: volume_triangles/industry_full_dict/grayscale/
+  grayscale: true
+  size: null
+  decreasing_scale: false
+  show_legend: true
 category_names:
 - Religion
 - Political Economy

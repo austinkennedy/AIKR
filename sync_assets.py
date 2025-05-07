@@ -23,7 +23,7 @@ mapping = {
     os.path.join(LITERATURE_PATH, 'regression_figures/progress_main_percentile/predicted_values.png'): 'fig_8/literature',
     os.path.join(EXPANDED_TRIMMED_PATH, 'volume_triangles/industry/grayscale'): 'fig_9',
     os.path.join(EXPANDED_TRIMMED_PATH, 'biscale_triangles'): 'fig_10',
-    os.path.join(EXPANDED_TRIMMED_PATH, 'regression_figures/industry_percentile/predicted_values.png'): 'fig_11',
+    os.path.join(EXPANDED_TRIMMED_PATH, 'regression_figures/industry_percentile/predicted_values_sci_pe.png'): 'fig_11',
     os.path.join(EXPANDED_TRIMMED_PATH, 'progress_oriented_books.csv'): 'section_6_books',
     os.path.join(EXPANDED_TRIMMED_PATH, 'regression_tables/progress_main_percentile/results.tex'): 'table_b_1',
     os.path.join(EXPANDED_TRIMMED_PATH, 'regression_tables/industry_percentile/results.tex'): 'table_b_3',
@@ -47,7 +47,7 @@ mapping = {
     os.path.join(EXPANDED_TRIMMED_PATH, 'volume_triangles/industry_full_dict/grayscale'): 'fig_b_20/grayscale',
     os.path.join(EXPANDED_TRIMMED_PATH, 'volume_triangles/industry_full_dict/color'): 'fig_b_20/color',
     os.path.join(EXPANDED_TRIMMED_PATH, 'volume_triangles/industry/color'): 'fig_b_21',
-    os.path.join(EXPANDED_TRIMMED_PATH, 'drop_1650/regression_figures/industry_percentile/predicted_values.png'): 'fig_b_22',
+    os.path.join(EXPANDED_TRIMMED_PATH, 'drop_1650/regression_figures/industry_percentile/predicted_values_sci_pe.png'): 'fig_b_22',
     os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'topic_triangles/grayscale'): 'fig_e_1',
     os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'volumes_over_time/Political Economy.png'): 'fig_e_2',
     os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'volumes_over_time/Science.png'): 'fig_e_2',
@@ -56,7 +56,7 @@ mapping = {
     os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'regression_figures/progress_main_percentile/predicted_values.png'): 'fig_e_4',
     os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'volume_triangles/industry/grayscale'): 'fig_e_5',
     os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'biscale_triangles'): 'fig_e_6',
-    os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'regression_figures/industry_percentile/predicted_values.png'): 'fig_e_7',
+    os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'regression_figures/industry_percentile/predicted_values_sci_pe.png'): 'fig_e_7',
     os.path.join(EXPANDED_TRIMMED_PATH, 'volume_triangles/optimistic'): 'fig_f_1'
 }
 

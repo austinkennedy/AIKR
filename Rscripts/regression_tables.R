@@ -1,6 +1,8 @@
 rm(list=ls())
 options(scipen=999)
 
+setwd("E:/grad_school/research/AIKR")
+
 library(yaml)
 library(tidyverse)
 library(fixest)
@@ -52,20 +54,34 @@ print(names(volumes))
 
 progress_var <- 'progress_main_percentile'
 
+# #Uses feols to carry clustered SEs throughout
+# mod <- feols(.[progress_var] ~ Science
+#              + Political.Economy
+#              + Science*Political.Economy
+#              + Science*Religion
+#              + Religion*Political.Economy
+#              + i(bin, Science, reference)
+#              + i(bin, Political.Economy, reference)
+#              + i(bin, Science*Religion, reference)
+#              + i(bin, Science*Political.Economy, reference)
+#              + i(bin, Political.Economy*Religion, reference)
+#              + i(bin, ref = reference)
+#              - Religion
+#              + Year, data = volumes, cluster = c("Year"))
+
 #Uses feols to carry clustered SEs throughout
-mod <- feols(.[progress_var] ~ Science 
-             + Political.Economy 
-             + Science*Political.Economy 
-             + Science*Religion 
-             + Religion*Political.Economy 
-             + i(bin, Science, reference) 
-             + i(bin, Political.Economy, reference) 
-             + i(bin, Science*Religion, reference) 
-             + i(bin, Science*Political.Economy, reference) 
-             + i(bin, Political.Economy*Religion, reference) 
-             + i(bin, ref = reference) 
-             - Religion 
-             + Year, data = volumes, cluster = c("Year"))
+mod <- feols(.[progress_var] ~ Science
+             + Political.Economy
+             + Science*Political.Economy
+             + Science*Religion
+             + Religion*Political.Economy
+             + i(bin, Science, reference)
+             + i(bin, Political.Economy, reference)
+             + i(bin, Science*Religion, reference)
+             + i(bin, Science*Political.Economy, reference)
+             + i(bin, Political.Economy*Religion, reference)
+             + i(bin, ref = reference)
+             - Religion , data = volumes, cluster = c("Year"))
 
 print(summary(mod))
 
@@ -194,6 +210,37 @@ for (ind in industry_vars){
 volumes$industry_percentile <- volumes[[ind]]
 
 #iterate through industry score versions
+# 
+# mod <- feols(progress_main_percentile ~ Science +
+#                Political.Economy +
+#                industry_percentile +
+#                Science*Political.Economy +
+#                Science*Religion +
+#                Religion*Political.Economy +
+#                Science*industry_percentile +
+#                Political.Economy*industry_percentile +
+#                # Religion*industry_percentile +
+#                Science*Political.Economy*industry_percentile +
+#                Science*Religion*industry_percentile +
+#                Religion*Political.Economy*industry_percentile +
+#                i(bin, Science, reference) +
+#                i(bin, Political.Economy, reference) +
+#                i(bin, industry_percentile, reference) +
+#                i(bin, Science*Religion, reference) +
+#                i(bin, Science*Political.Economy, reference) +
+#                i(bin, Political.Economy*Religion, reference) +
+#                i(bin, Science*industry_percentile, reference) +
+#                i(bin, Political.Economy*industry_percentile, reference) +
+#                # i(bin, Religion*industry_percentile, 1610) +
+#                i(bin, Science*Political.Economy*industry_percentile, reference) +
+#                i(bin, Science*Religion*industry_percentile, reference) +
+#                i(bin, Religion*Political.Economy*industry_percentile, reference) +
+#                i(bin, ref = reference) -
+#                Religion -
+#                Religion*industry_percentile+
+#                industry_percentile +
+#                Year,
+#              data = volumes, cluster = c("Year"))
 
 mod <- feols(progress_main_percentile ~ Science +
                Political.Economy +
@@ -222,8 +269,7 @@ mod <- feols(progress_main_percentile ~ Science +
                i(bin, ref = reference) -
                Religion -
                Religion*industry_percentile+
-               industry_percentile +
-               Year,
+               industry_percentile,
              data = volumes, cluster = c("Year"))
 
 

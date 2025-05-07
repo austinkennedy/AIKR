@@ -1,6 +1,8 @@
 rm(list=ls())
 options(scipen=999)
 
+setwd("E:/grad_school/research/AIKR")
+
 library(yaml)
 library(tidyverse)
 library(fixest)
@@ -63,7 +65,8 @@ if (category_flexible == 'Political Economy') {
 
 print(names(volumes))
 
-progress_vars <- list('progress_main_percentile', 'progress_original_percentile', 'progress_secondary_percentile')
+# progress_vars <- list('progress_main_percentile', 'progress_original_percentile', 'progress_secondary_percentile')
+progress_vars <- list('progress_main_percentile')
 
 for (progress_var in progress_vars){
 # model <- feols(
@@ -89,9 +92,25 @@ for (progress_var in progress_vars){
 
 #rewrite formula to get marginal effects
 
-volumes$bin <- as.factor(volumes$bin)#as factor for easier regression
+# volumes$bin <- as.factor(volumes$bin)#as factor for easier regression
+
+volumes$bin <- factor(volumes$bin)
 
 bins <- as_factor(bins)#gives 'margins' input values
+
+# model_formula <- as.formula(paste0(
+#   progress_var, " ~ ",
+#   category_religion, "*",
+#   category_science, "*bin + ",
+#   category_religion, "*",
+#   category_flexible, "*bin + ",
+#   category_science, "*",
+#   category_flexible, "*bin - ",
+#   category_religion, " - ",
+#   category_religion, "*bin + ",
+#   category_flexible, " + bin + Year"
+# ))
+
 
 model_formula <- as.formula(paste0(
   progress_var, " ~ ",
@@ -103,7 +122,7 @@ model_formula <- as.formula(paste0(
   category_flexible, "*bin - ",
   category_religion, " - ",
   category_religion, "*bin + ",
-  category_flexible, " + bin + Year"
+  category_flexible, " + bin"
 ))
 
 model_marginal_predicted <- lm(model_formula, data = volumes)
@@ -131,10 +150,11 @@ pred <- function(lm, sci, rel, flex){
   data_list[[category_religion]] <- rel
   data_list[[category_flexible]] <- flex
   data_list[["bin"]] <- bins
-  data_list[["Year"]] <- bins_numeric
+  # data_list[["Year"]] <- bins_numeric
 
   data <- as.data.frame(data_list)
   prediction <- Predict(lm, newdata = data, interval = "confidence", se.fit =TRUE, vcov = cluster)
+  # return(prediction)
   fit <- data.frame(prediction$fit)
   return(fit)
 }
@@ -159,6 +179,8 @@ r50f50_p$bin <- bins
 
 predicted <- rbind(s100_p, s50r50_p, s50f50_p, thirds_p, r50f50_p)
 
+print(predicted)
+
 predicted$bin <- as.numeric(as.character(predicted$bin))
 
 predicted_fig <- ggplot(predicted, aes(x = bin, y = fit, group = label)) +
@@ -174,7 +196,19 @@ ggsave(paste(path, '/predicted_values.png', sep=''), width = 8)
 
 ##########################################Industry Predicted Figs
 
-volumes$bin <- as.factor(volumes$bin)
+volumes$bin <- factor(volumes$bin)
+
+# model_formula_industry <- as.formula(paste0(
+#   'progress_main_percentile', " ~ ",
+#   category_religion, "*",
+#   category_science, "*industry_percentile*bin + ",
+#   category_religion, "*",
+#   category_flexible, "*industry_percentile*bin + ",
+#   category_science, "*",
+#   category_flexible, "*industry_percentile*bin - ",
+#   category_religion, "*industry_percentile*bin + ",
+#   "bin*industry_percentile + Year"
+# ))
 
 model_formula_industry <- as.formula(paste0(
   'progress_main_percentile', " ~ ",
@@ -185,8 +219,9 @@ model_formula_industry <- as.formula(paste0(
   category_science, "*",
   category_flexible, "*industry_percentile*bin - ",
   category_religion, "*industry_percentile*bin + ",
-  "bin*industry_percentile + Year"
+  "bin*industry_percentile"
 ))
+
 
 model_marginal_predicted_industry <- lm(model_formula_industry, data = volumes)
 print(summary(model_marginal_predicted_industry))
@@ -200,9 +235,10 @@ pred_industry <- function(lm, sci, rel, flex, ind){
   data_list[[category_flexible]] <- flex
   data_list[["industry_percentile"]] <- ind
   data_list[["bin"]] <- bins
-  data_list[["Year"]] <- bins_numeric
+  # data_list[["Year"]] <- bins_numeric
 
   data <- as.data.frame(data_list)
+  # return(data)
   prediction <- Predict(lm, newdata = data, interval = "confidence", se.fit =TRUE, vcov = cluster)
   fit <- data.frame(prediction$fit)
   return(fit)
@@ -303,3 +339,54 @@ if (!dir.exists(path)){
 
 ggsave(paste(path, '/predicted_values.png', sep =''), width = 13.5)
 
+######################################Figure with different values of industry
+
+# Set science = 0.5, flexible = 0.5, religion = 0
+industry_levels <- c(0, 0.25, 0.5, 0.75, 1)
+pred_list <- list()
+
+for (ind in industry_levels) {
+  pred_df <- pred_industry(
+    lm = model_marginal_predicted_industry,
+    sci = 0.5,
+    rel = 0,
+    flex = 0.5,
+    ind = ind
+  )
+  pred_df$bin <- bins
+  pred_df$industry_percentile <- ind
+  pred_df$label <- paste0("Industry = ", ind)
+  pred_list[[as.character(ind)]] <- pred_df
+}
+
+#add progress regression line
+s50f50_p$label <- "Progress Regression (No Industry)"
+s50f50_p$industry_percentile <- NA  # Not used, but for consistent structure
+
+pred_list[['progress_reg']] <- s50f50_p
+
+
+# Combine all predictions into one dataframe
+pred_combined <- bind_rows(pred_list)
+
+# Convert bin to numeric (if needed)
+pred_combined$bin <- as.numeric(as.character(pred_combined$bin))
+
+
+predicted_fig <- ggplot(pred_combined, aes(x = bin, y = fit, group = label)) +
+  geom_line(aes(color = label, linetype = label)) +
+  geom_ribbon(aes(ymin = lwr, ymax = upr, fill = label), alpha = 0.2) +
+  labs(
+    x = "Year",
+    y = "Predicted Value"
+  ) +
+  theme_light() +
+  theme(axis.text = element_text(size=10),
+        legend.text = element_text(size=12),
+        legend.title = element_text(size = 12),
+        axis.title = element_text(size = 12))
+
+# Show plot
+print(predicted_fig)
+
+ggsave(paste(path, '/predicted_values_sci_pe.png', sep =''), width = 13.5)
