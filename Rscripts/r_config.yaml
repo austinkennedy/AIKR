@@ -1,25 +1,25 @@
-version: expanded_trimmed
-input_path: ./data/expanded_trimmed/input/
-temporary_path: ./data/expanded_trimmed_unbinned/temporary/
-output_path: ./data/expanded_trimmed_unbinned/output/drop_1650/
+version: coherence
+input_path: ./data/coherence/input/
+temporary_path: ./data/coherence/temporary/
+output_path: ./data/coherence/output/
 eliminated_topics: []
 categories:
   Religion:
-  - 10
-  - 34
-  - 38
-  Political Economy:
-  - 13
-  - 35
-  - 36
-  Science:
   - 3
-  - 41
-  - 43
+  - 30
+  - 35
+  Political Economy:
+  - 8
+  - 14
+  - 19
+  Science:
+  - 2
+  - 7
+  - 23
 half_century: true
-bins: false
+bins: true
 category_plots_ymax: 2500
-min_regression_year: 1650
+min_regression_year: 1600
 ternary_figs:
 - color: progress_original_percentile
   legend_title: Progress (Percentile)

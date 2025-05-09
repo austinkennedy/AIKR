@@ -14,13 +14,16 @@ def main_coherence():
 
     config = load_config('configs/config_coherence.yaml')
 
-    # run_clean_data(config)
+    run_clean_data(config)
     run_cross_topics(config)
     run_categories(config)
-    # run_shares(config)
-    # run_topic_volume_weights(config)
-    # run_volume_data(config)
-    # run_figures(config)
+    run_shares(config)
+    run_topic_volume_weights(config)
+    run_volume_data(config)
+    run_figures(config)
+    create_r_config(config, 'Rscripts/r_config.yaml')
+    subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
+    subprocess.run(['Rscript', 'Rscripts/additional_ternary_figs.R'])
 
 if __name__ == "__main__":
     main_coherence()

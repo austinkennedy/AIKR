@@ -6,6 +6,7 @@ EXPANDED_TRIMMED_UNBINNED_PATH = './data/expanded_trimmed_unbinned/output/'
 ECONOMICS_PATH = './data/alternative_corners_economics/output/'
 LITERATURE_PATH = './data/alternative_corners_literature/output/'
 LAW_PATH = './data/alternative_corners_law/output/'
+COHERENCE_PATH = './data/coherence/output/'
 DEST_DIR = './data/paper_assets/'
 
 mapping = {
@@ -57,7 +58,9 @@ mapping = {
     os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'volume_triangles/industry/grayscale'): 'fig_e_5',
     os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'biscale_triangles'): 'fig_e_6',
     os.path.join(EXPANDED_TRIMMED_UNBINNED_PATH, 'regression_figures/industry_percentile/predicted_values_sci_pe.png'): 'fig_e_7',
-    os.path.join(EXPANDED_TRIMMED_PATH, 'volume_triangles/optimistic'): 'fig_f_1'
+    os.path.join(EXPANDED_TRIMMED_PATH, 'volume_triangles/optimistic'): 'fig_f_1',
+    os.path.join(COHERENCE_PATH, 'volume_triangles/progress_main/color'): 'fig_c_1',
+    os.path.join(COHERENCE_PATH, 'regression_figures/progress_main_percentile/predicted_values.png'): 'fig_c_2',
 }
 
 if __name__ == '__main__':

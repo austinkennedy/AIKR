@@ -11,17 +11,17 @@ eliminated_topics: []
 # Classification is subjective—check before running 'topic_volume_weights.py'
 categories:
   Religion:
-    - 10
-    - 34
-    - 38
-  Political Economy:
-    - 13
-    - 35
-    - 36
-  Science:
     - 3
-    - 41
-    - 43
+    - 30
+    - 35
+  Political Economy:
+    - 8
+    - 14
+    - 19
+  Science:
+    - 2
+    - 7
+    - 23
 
 half_century: true
 
@@ -30,3 +30,132 @@ bins: true
 category_plots_ymax: 2500
 
 min_regression_year: 1600
+
+ternary_figs:
+  - color: progress_original_percentile
+    legend_title: Progress (Percentile)
+    filepath: volume_triangles/progress_original/color/
+    grayscale: false
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: progress_original_percentile
+    legend_title: Progress (Percentile)
+    filepath: volume_triangles/progress_original/grayscale/
+    grayscale: true
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: progress_main_percentile
+    legend_title: Progress (Percentile)
+    filepath: volume_triangles/progress_main/color/
+    grayscale: false
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: progress_main_percentile
+    legend_title: Progress (Percentile)
+    filepath: volume_triangles/progress_main/grayscale/
+    grayscale: true
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: industry_percentile
+    legend_title: Industry (Percentile)
+    filepath: volume_triangles/industry/color/
+    grayscale: false
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: industry_percentile
+    legend_title: Industry (Percentile)
+    filepath: volume_triangles/industry/grayscale/
+    grayscale: true
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: progress_secondary_percentile
+    legend_title: Progress (Percentile)
+    filepath: volume_triangles/progress_secondary/color/
+    grayscale: false
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: progress_secondary_percentile
+    legend_title: Progress (Percentile)
+    filepath: volume_triangles/progress_secondary/grayscale/
+    grayscale: true
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: optimistic_percentile
+    legend_title: Optimistic (Percentile)
+    filepath: volume_triangles/optimistic/
+    grayscale: false
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: progress_main_percentile
+    legend_title: Progress (Percentile)
+    filepath: volume_triangles/industry_optimism/increasing_scale/
+    grayscale: false
+    size: industry_percentile
+    decreasing_scale: false
+    show_legend: false
+
+  - color: progress_main_percentile
+    legend_title: Progress (Percentile)
+    filepath: volume_triangles/industry_optimism/decreasing_scale/
+    grayscale: false
+    size: industry_percentile
+    decreasing_scale: true
+    show_legend: true
+
+  - color: progress_regression_original_percentile
+    legend_title: Progress - Regression (Percentile)
+    filepath: volume_triangles/progress_regression_original/
+    grayscale: false
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: progress_regression_main_percentile
+    legend_title: Progress - Regression (Percentile)
+    filepath: volume_triangles/progress_regression_main/
+    grayscale: false
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: progress_regression_secondary_percentile
+    legend_title: Progress - Regression
+    filepath: volume_triangles/progress_regression_secondary/
+    grayscale: false
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: industry_full_dict_percentile
+    legend_title: Industry (Percentile)
+    filepath: volume_triangles/industry_full_dict/color/
+    grayscale: false
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: industry_full_dict_percentile
+    legend_title: Industry (Percentile)
+    filepath: volume_triangles/industry_full_dict/grayscale/
+    grayscale: true
+    size: null
+    decreasing_scale: false
+    show_legend: true
