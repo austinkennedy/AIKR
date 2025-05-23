@@ -1,27 +1,28 @@
-version: 'expanded_trimmed'
+version: 'pre_1800'
 
 input_path : "./data/input_all/"
 
-temporary_path: "./data/expanded_trimmed/temporary/"
+temporary_path: "./data/pre_1800/temporary/"
 
-output_path: "./data/expanded_trimmed/output/"
+output_path: "./data/pre_1800/output/"
 
 eliminated_topics: []
+
 
 # Classification is subjective—check before running 'topic_volume_weights.py'
 categories:
   Religion:
-    - 10
-    - 34
-    - 38
+    - 6
+    - 47
+    - 56
   Political Economy:
-    - 13
-    - 35
-    - 36
+    - 18
+    - 30
+    - 46
   Science:
-    - 3
-    - 41
-    - 43
+    - 8
+    - 9
+    - 26
 
 half_century: true
 
@@ -155,38 +156,6 @@ ternary_figs:
   - color: industry_full_dict_percentile
     legend_title: Industry (Percentile)
     filepath: volume_triangles/industry_full_dict/grayscale/
-    grayscale: true
-    size: null
-    decreasing_scale: false
-    show_legend: true
-
-  - color: industry_1708_percentile
-    legend_title: Industry (Percentile)
-    filepath: volume_triangles/industry_1708/color/
-    grayscale: false
-    size: null
-    decreasing_scale: false
-    show_legend: true
-
-  - color: industry_1708_percentile
-    legend_title: Industry (Percentile)
-    filepath: volume_triangles/industry_1708/grayscale/
-    grayscale: true
-    size: null
-    decreasing_scale: false
-    show_legend: true
-
-  - color: optimism_abbreviated_percentile
-    legend_title: Optimism (Percentile)
-    filepath: volume_triangles/optimism_abbreviated/color/
-    grayscale: false
-    size: null
-    decreasing_scale: false
-    show_legend: true
-
-  - color: optimism_abbreviated_percentile
-    legend_title: Optimism (Percentile)
-    filepath: volume_triangles/optimism_abbreviated/grayscale/
     grayscale: true
     size: null
     decreasing_scale: false

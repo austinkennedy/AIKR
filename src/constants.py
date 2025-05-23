@@ -4,6 +4,22 @@ progress_oriented_books = [
     'wu.89097040273'
 ]
 
-famous_volumes = [
-    
+manual_and_related_words = [
+    'manual',
+    'almanac',
+    'guide',
+    'handbook',
+    'instruction',
+    'yearbook',
+    'compendium',
+    'catalog',
+    'catalogue',
+    'calendar',
+    'companion',
+    'reference',
+    'directory',
+    'booklet',
+    'year-book',
+    'hand-book',
+    'blueprint'
 ]

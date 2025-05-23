@@ -210,17 +210,22 @@ volumes$bin <- factor(volumes$bin)
 #   "bin*industry_percentile + Year"
 # ))
 
+industry_vars <- list("industry_percentile", "industry_1708_percentile")
+
+for (industry_var in industry_vars){
+
 model_formula_industry <- as.formula(paste0(
-  'progress_main_percentile', " ~ ",
+  "progress_main_percentile", " ~ ",
   category_religion, "*",
-  category_science, "*industry_percentile*bin + ",
+  category_science, "*", industry_var, "*bin", " + ",
   category_religion, "*",
-  category_flexible, "*industry_percentile*bin + ",
+  category_flexible, "*", industry_var, "*bin", " + ",
   category_science, "*",
-  category_flexible, "*industry_percentile*bin - ",
-  category_religion, "*industry_percentile*bin + ",
-  "bin*industry_percentile"
+  category_flexible, "*", industry_var, "*bin", " - ",
+  category_religion, "*", industry_var, "*bin", " + ",
+  "bin*", industry_var
 ))
+
 
 
 model_marginal_predicted_industry <- lm(model_formula_industry, data = volumes)
@@ -233,7 +238,7 @@ pred_industry <- function(lm, sci, rel, flex, ind){
   data_list[[category_science]] <- sci
   data_list[[category_religion]] <- rel
   data_list[[category_flexible]] <- flex
-  data_list[["industry_percentile"]] <- ind
+  data_list[[industry_var]] <- ind
   data_list[["bin"]] <- bins
   # data_list[["Year"]] <- bins_numeric
 
@@ -327,7 +332,7 @@ figure <- ggarrange(predicted_fig_0, predicted_fig_1,
                     widths = c(5.5,8))
 show(figure)
 
-path <- paste(output_folder, 'regression_figures/industry_percentile', sep='')
+path <- paste(output_folder, 'regression_figures/', industry_var, sep='')
 
 if (!dir.exists(path)){
   dir.create(path, recursive = TRUE)
@@ -354,14 +359,14 @@ for (ind in industry_levels) {
     ind = ind
   )
   pred_df$bin <- bins
-  pred_df$industry_percentile <- ind
+  pred_df[[industry_var]] <- ind
   pred_df$label <- paste0("Industry = ", ind)
   pred_list[[as.character(ind)]] <- pred_df
 }
 
 #add progress regression line
 s50f50_p$label <- "Progress Regression (No Industry)"
-s50f50_p$industry_percentile <- NA  # Not used, but for consistent structure
+s50f50_p[[industry_var]] <- NA  # Not used, but for consistent structure
 
 pred_list[['progress_reg']] <- s50f50_p
 
@@ -390,3 +395,5 @@ predicted_fig <- ggplot(pred_combined, aes(x = bin, y = fit, group = label)) +
 print(predicted_fig)
 
 ggsave(paste(path, '/predicted_values_sci_pe.png', sep =''), width = 13.5)
+
+}

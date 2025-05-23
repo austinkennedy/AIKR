@@ -1,6 +1,6 @@
 version: 'coherence'
 
-input_path : "./data/coherence/input/"
+input_path : "./data/input_all/"
 
 temporary_path: "./data/coherence/temporary/"
 

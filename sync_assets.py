@@ -61,6 +61,7 @@ mapping = {
     os.path.join(EXPANDED_TRIMMED_PATH, 'volume_triangles/optimistic'): 'fig_f_1',
     os.path.join(COHERENCE_PATH, 'volume_triangles/progress_main/color'): 'fig_c_1',
     os.path.join(COHERENCE_PATH, 'regression_figures/progress_main_percentile/predicted_values.png'): 'fig_c_2',
+    os.path.join(EXPANDED_TRIMMED_PATH, 'estc_figures/estc_hathitrust_pdf.png'): 'fig_d_2',
 }
 
 if __name__ == '__main__':

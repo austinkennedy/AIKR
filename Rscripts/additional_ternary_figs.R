@@ -179,6 +179,72 @@ for (year in years){
 }
 
 
+###########Biscale triangles using alternative industry
+
+bi_palette <- 'DkViolet2'
+dimensions <- 4
+
+#create filepath
+path <- paste(output_folder, 'biscale_triangles_industry_1708', sep = '')
+if (!dir.exists(path)){
+  dir.create(path, recursive = TRUE)
+  
+  print('directory created')
+}else{
+  print('dir exists')
+}
+
+#make industry column name consistent
+if ("industry_1643_percentile" %in% names(df)) {
+  names(df)[names(df) == "industry_1643_percentile"] <- "industry_percentile"
+}
+
+volumes <- bi_class(volumes, x = progress_main_percentile, y = industry_1708_percentile, style = 'equal', dim = dimensions)
+
+for (year in years){
+  
+  if (config$bins == TRUE){
+    df <- volumes %>% filter(Year >= year - 10,
+                             Year <= year + 10)
+  }else{
+    df <- volumes %>% filter(Year == year)
+  }
+  
+  fig <- ggtern(data = df, mapping = aes(x = Political.Economy, y = Religion, z = Science ,color = bi_class)) +
+    geom_point(show.legend = FALSE) +
+    bi_scale_color(pal = bi_palette, dim = 4) +
+    labs(x = 'Political\nEconomy', y = 'Religion', z = 'Science', title = year) +
+    limit_tern(limits=c(0,1.0),
+               breaks=seq(0,1,by=0.2),
+               labels=seq(0,1,by=0.2))+
+    theme_classic() +
+    theme(tern.axis.title.R = element_text(hjust=0.6, vjust = 0.9, size = 18),
+          tern.axis.title.L = element_text(hjust = 0.3, vjust = 0.9, size = 18),
+          tern.axis.title.T = element_text(size = 18),
+          title = element_text(size = 18),
+          axis.text = element_text(size = 15),
+          plot.margin = margin(0,0,-15,0))
+  
+  if(year == 1850){
+    legend <- bi_legend(pal = bi_palette,
+                        dim = dimensions,
+                        xlab = "Higher Progress",
+                        ylab = "Higher Industry",
+                        size = 18)
+    
+    fig_go <- ggplotGrob(fig)
+    
+    fig_combined <- ggdraw() +
+      draw_plot(fig_go, 0, 0, 1, 1) +
+      draw_plot(legend, 0.62, 0.4, 0.5, 0.5)
+    show(fig_combined)
+    ggsave(paste(path, '/', year, '.png', sep = ''), plot = fig_combined, width = 12, height = 6.5)
+    
+  }else{
+    show(fig)
+    ggsave(paste(path, '/', year, '.png', sep = ''), plot = fig, width = 8, height = 6.5)
+  }
+}
 
 
 

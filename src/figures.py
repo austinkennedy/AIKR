@@ -38,9 +38,11 @@ def calculate_summary_data(volumes, years, categories, config):
     volumes_time = {cat: [] for cat in categories}
     cat_avgs = {}
     cat_avgs_transl = {}
+    cat_avgs_manual = {}
     moving_volumes = {}
     avg_progress = {}
     avg_progress_transl = {}
+    avg_progress_manual = {}
 
     for year in years:
         
@@ -50,12 +52,14 @@ def calculate_summary_data(volumes, years, categories, config):
             df = volumes[volumes['Year'] == year]
 
         df_transl = df[df['translation'] == 1] #get only translated volumes
+        df_manual = df[df['manual_flag'] == 1] #get only volumes that reference manual or related words
 
         for category in categories:
             volumes_time[category].append(category_averages_by_year(df, year, category, categories))
 
         cat_avgs[year] = category_averages_overall(df, year, categories)
         cat_avgs_transl[year] = category_averages_overall(df_transl, year, categories)
+        cat_avgs_manual[year] = category_averages_overall(df_manual, year, categories)
         moving_volumes[year] = df.copy()
 
         if len(volumes[volumes['Year'] == year]) != 0:
@@ -68,6 +72,11 @@ def calculate_summary_data(volumes, years, categories, config):
         else:
             avg_progress_transl[year] = np.nan
 
+        if len(df_manual) > 0:
+            avg_progress_manual[year] = statistics.mean(df_manual['progress_main_percentile'])
+        else:
+            avg_progress_manual[year] = np.nan
+
 
 
     #do a little data cleaning
@@ -79,6 +88,7 @@ def calculate_summary_data(volumes, years, categories, config):
 
     cat_avgs = pd.concat(cat_avgs).reset_index(drop=True)
     cat_avgs_transl = pd.concat(cat_avgs_transl).reset_index(drop=True)
+    cat_avgs_manual = pd.concat(cat_avgs_manual).reset_index(drop=True)
 
     avg_progress = pd.DataFrame.from_dict(avg_progress, orient='index').reset_index()
     avg_progress.columns = ['Year', 'avg_progress']
@@ -86,7 +96,10 @@ def calculate_summary_data(volumes, years, categories, config):
     avg_progress_transl = pd.DataFrame.from_dict(avg_progress_transl, orient='index').reset_index()
     avg_progress_transl.columns = ['Year', 'avg_progress']
 
-    return moving_volumes, cat_avgs, cat_avgs_transl, volumes_time, avg_progress, avg_progress_transl
+    avg_progress_manual = pd.DataFrame.from_dict(avg_progress_manual, orient='index').reset_index()
+    avg_progress_manual.columns = ['Year', 'avg_progress']
+
+    return moving_volumes, cat_avgs, cat_avgs_transl, cat_avgs_manual, volumes_time, avg_progress, avg_progress_transl, avg_progress_manual
 
 
 def category_plots(volumes_time, categories, config, ymax):
@@ -126,6 +139,20 @@ def category_averages_translations(cat_avgs, cat_avgs_transl, config, categories
 
     fig.savefig(config['output_path'] + 'volumes_over_time/corpus_vs_transl_categories.png', dpi=200)
 
+def category_averages_manual(cat_avgs, cat_avgs_manual, config, categories):
+    fig, (ax1) = plt.subplots(1,1, figsize=(9,6))
+    colors = ['b', 'r', 'g']
+    lines_non_transl = ['solid', 'dotted', 'dashdot']
+    lines_manual = ['dashed', (0, (1,1)), (0, (3,5,1,5))]
+
+    for i, cat in enumerate(categories):
+        ax1.plot(cat_avgs['Year'], cat_avgs[cat], label = cat, color = colors[i], linestyle = lines_non_transl[i])
+        ax1.plot(cat_avgs_manual['Year'], cat_avgs_manual[cat], label = cat + ' (Manual)', color = colors[i], linestyle = lines_manual[i])
+    plt.legend(loc= 'upper center', ncol = 3)
+    plt.ylim([0,1])
+
+    fig.savefig(config['output_path'] + 'volumes_over_time/corpus_vs_manual_categories.png', dpi=200)
+
 
 def volume_count_plots(volume_counts_by_year, config):
 
@@ -149,24 +176,35 @@ def volume_count_plots(volume_counts_by_year, config):
     ax1.legend(loc = 'upper left')
     fig.savefig(config['output_path'] + 'volumes_over_time/' + 'total_volumes.png', dpi = 200)
 
-def progress_plots(avg_progress, config, translations = False, avg_progress_transl = None):
+def progress_plots(avg_progress, config, translations = False, manual = False, avg_progress_transl = None, avg_progress_manual = None):
     df = avg_progress.copy()
     df['avg_progress_rolling'] = df['avg_progress'].rolling(window=20, min_periods=1, center = True).mean() #rolling average of volumes
+
+    if translations and manual:
+        return ValueError('Please choose either translations or manual, not both.')
 
     if avg_progress_transl is not None:
         df_transl = avg_progress_transl.copy()
         df_transl['avg_progress_rolling'] = df_transl['avg_progress'].rolling(window=20, min_periods=1, center = True).mean()
+
+    if avg_progress_manual is not None:
+        df_manual = avg_progress_manual.copy()
+        df_manual['avg_progress_rolling'] = df_manual['avg_progress'].rolling(window=20, min_periods=1, center = True).mean()
 
     #raw values plot
     fig, (ax1) = plt.subplots(1,1)
     ax1.plot(df['Year'], df['avg_progress'], label = 'Average Progress Score (Percentile)', color = 'crimson', linestyle = 'solid')
     if translations:
         ax1.plot(df['Year'], avg_progress_transl['avg_progress'], label = 'Average Progress Score (Translations)', color = 'crimson', linestyle = 'dashed')
+    elif manual:
+        ax1.plot(df['Year'], df_manual['avg_progress'], label = 'Average Progress Score (Manual)', color = 'crimson', linestyle = 'dashed')
     ax1.legend(loc = 'upper right')
     ax1.set_xlabel('Year')
     ax1.set_yticks([0, 0.25, 0.5, 0.75, 1])
     if translations:
         fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress_translations_raw.png', dpi = 200)
+    elif manual:
+        fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress_manual_raw.png', dpi = 200)
     else:
         fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress_raw.png', dpi = 200)
 
@@ -175,11 +213,15 @@ def progress_plots(avg_progress, config, translations = False, avg_progress_tran
     ax1.plot(df['Year'], df['avg_progress_rolling'], label = 'Average Progress Score (Percentile)', color = 'crimson', linestyle = 'solid')
     if translations:
         ax1.plot(df['Year'], df_transl['avg_progress_rolling'], label = 'Average Progress Score (Translations)', color = 'crimson', linestyle = 'dashed')
+    elif manual:
+        ax1.plot(df['Year'], df_manual['avg_progress_rolling'], label = 'Average Progress Score (Manual)', color = 'crimson', linestyle = 'dashed')
     ax1.legend(loc = 'upper right')
     ax1.set_xlabel('Year')
     ax1.set_yticks([0, 0.25, 0.5, 0.75, 1])
     if translations:
         fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress_translations.png', dpi = 200)
+    elif manual:
+        fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress_manual.png', dpi = 200)
     else:
         fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress.png', dpi = 200)
 
@@ -219,6 +261,57 @@ def topic_ternary_plots(config, topic_shares, years, categories):
                 trace.marker.color = gray_map[cat]
 
         fig.write_image(config['output_path'] + 'topic_triangles/grayscale/' + str(year) +'.png', width = 900)
+
+
+def estc_distribution_plot(config, estc_data, volume_counts_by_year, all_years):
+        """Create ESTC vs. HDL volume distribution plots"""
+        
+        make_dir(config['output_path'] + 'estc_figures/')
+
+        estc_data['Year'] = estc_data['Publisher/year'].str.replace(r"\D", '')
+        estc_data['Year'] = estc_data['Year'].replace('', np.nan)
+        estc_data = estc_data.dropna(subset = ['Year'])
+        estc_data['Year'] = estc_data['Year'].astype('float64')
+        estc_data = estc_data[(estc_data['Year'] >= 1500) & (estc_data['Year'] <= 1800)]
+        estc_data['Year'] = estc_data['Year'].astype('int')
+        estc_data.rename(columns = {'ESTC System No.': 'estc_id'}, inplace = True)
+
+        estc_counts = estc_data.groupby('Year')['estc_id'].count().reset_index()
+        estc_counts = estc_counts.set_index('Year').reindex(all_years, fill_value=0).reset_index().rename(columns={'estc_id': 'estc_volumes'})
+        volume_counts = pd.merge(volume_counts_by_year, estc_counts, on = 'Year', how = 'left')
+        volume_counts.rename(columns = {'Count': 'hathitrust_volumes'}, inplace = True)
+        volume_counts = volume_counts[volume_counts['Year'] <= 1800]
+
+        volume_counts['estc_volumes_rolling'] = volume_counts['estc_volumes'].rolling(window = 20, min_periods=1, center = True).mean()
+        volume_counts['hathitrust_volumes_rolling'] = volume_counts['hathitrust_volumes'].rolling(window = 20, min_periods=1, center=True).mean()
+        volume_counts['estc_cumulative'] = volume_counts['estc_volumes'].cumsum() / volume_counts['estc_volumes'].sum()
+        volume_counts['hathitrust_cumulative'] = volume_counts['hathitrust_volumes'].cumsum() / volume_counts['hathitrust_volumes'].sum()
+        volume_counts['estc_share'] = volume_counts['estc_volumes'] / volume_counts['estc_volumes'].sum()
+        volume_counts['hathitrust_share'] = volume_counts['hathitrust_volumes'] / volume_counts['hathitrust_volumes'].sum()
+        volume_counts['estc_rolling_share'] = volume_counts['estc_volumes_rolling'] / volume_counts['estc_volumes_rolling'].sum()
+        volume_counts['hathitrust_rolling_share'] = volume_counts['hathitrust_volumes_rolling'] / volume_counts['hathitrust_volumes_rolling'].sum()
+
+        fig, (ax1) = plt.subplots(1,1)
+        ax1.plot(volume_counts['Year'], volume_counts['estc_cumulative'], color = 'red', label = 'ESTC')
+        ax1.plot(volume_counts['Year'], volume_counts['hathitrust_cumulative'], color = 'darkblue', label = 'HDL')
+        ax1.legend(loc = "upper left")
+        ax1.set_xlabel('Year')
+        ax1.set_ylabel('Cumulative Share')
+        ax1.set_yticks([0,0.25, 0.5, 0.75, 1])
+        ax1.set_yticklabels(["0", "0.25", "0.5", "0.75", "1"])
+        fig.savefig(config['output_path'] + 'estc_figures/estc_hathitrust_counts.png', dpi = 200)
+        fig.show()
+
+        fig, (ax1) = plt.subplots(1,1)
+        ax1.plot(volume_counts['Year'], volume_counts['estc_rolling_share'], color = 'red', label = 'ESTC', linestyle = 'dashed')
+        ax1.plot(volume_counts['Year'], volume_counts['hathitrust_rolling_share'], color = 'darkblue', label = 'HDL')
+        ax1.legend(loc = "upper left")
+        ax1.set_xlabel('Year')
+        ax1.set_ylabel('Share')
+        ax1.set_yticks([0,0.01, 0.02, 0.03])
+        ax1.set_yticklabels(["0", "0.01", "0.02", "0.03"])
+        fig.savefig(config['output_path'] + 'estc_figures/estc_hathitrust_pdf.png', dpi = 200)
+        fig.show()
 
 
 
@@ -317,16 +410,17 @@ def run_figures(config):
         topic_shares[year]['Color'] = topic_shares[1850][categories].idxmax(axis=1)
 
     #count overall volumes by year
-    volume_counts_by_year = metadata.groupby('Year')['HTID'].count().reset_index()#get counts of each category by year
+    volume_counts_by_year = metadata.groupby('Year')['HTID'].count().reset_index()
     #fill missing years with 0
     volume_counts_by_year = volume_counts_by_year.set_index('Year').reindex(all_years, fill_value=0).reset_index().rename(columns={'HTID': 'Count'})
 
-    moving_volumes, cat_avgs, cat_avgs_transl, volumes_time, avg_progress, avg_progress_transl = calculate_summary_data(volumes, years, categories, config)
+    moving_volumes, cat_avgs, cat_avgs_transl, cat_avgs_manual, volumes_time, avg_progress, avg_progress_transl, avg_progress_manual = calculate_summary_data(volumes, years, categories, config)
 
     make_dir(config['output_path'] + 'volumes_over_time/')
 
     category_plots(volumes_time, categories, config, config['category_plots_ymax'])
     category_averages_translations(cat_avgs, cat_avgs_transl, config, categories)
+    category_averages_manual(cat_avgs, cat_avgs_manual, config, categories)
 
     topic_ternary_plots(config, topic_shares, half_centuries, categories)
 
@@ -334,6 +428,12 @@ def run_figures(config):
 
     progress_plots(avg_progress, config)
     progress_plots(avg_progress, config, translations = True, avg_progress_transl = avg_progress_transl)
+    progress_plots(avg_progress, config, manual = True, avg_progress_manual = avg_progress_manual)
+
+    #Create ESTC vs. HDL volume distribution plots
+    if config['version'] == 'expanded_trimmed':
+        estc_data = pd.read_csv(config['input_path'] + 'estc_1500_to_1800.csv')
+        estc_distribution_plot(config, estc_data, volume_counts_by_year, all_years)
 
     for fig in config['ternary_figs']:
         ternary_plots(data=moving_volumes,
