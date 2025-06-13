@@ -29,6 +29,8 @@ def create_r_config(config, config_path):
 
     config['category_names'] = list(config['categories'].keys())
 
+    config['author_fe'] = config.get('author_fe', False)
+
     with open(config_path, 'w') as f:
         yaml.dump(config, f, sort_keys=False)
 

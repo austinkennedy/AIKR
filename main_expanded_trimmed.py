@@ -22,18 +22,30 @@ def main_expanded_trimmed():
 
     config = load_config('configs/config_expanded_trimmed.yaml')
 
-    run_clean_data(config)
-    run_cross_topics(config)
-    run_categories(config)
-    run_shares(config)
-    run_topic_volume_weights(config)
-    run_volume_data(config)
-    run_figures(config)
-    # create_r_config(config, 'Rscripts/r_config.yaml')
+    # run_clean_data(config)
+    # run_cross_topics(config)
+    # run_categories(config)
+    # run_shares(config)
+    # run_topic_volume_weights(config)
+    # run_volume_data(config)
+    # run_figures(config)
+    create_r_config(config, 'Rscripts/r_config.yaml')
     # subprocess.run(['Rscript', 'Rscripts/regression_tables.R'])
-    # subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
+    subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
     # subprocess.run(['Rscript', 'Rscripts/famous_books.R'])
     # subprocess.run(['Rscript', 'Rscripts/additional_ternary_figs.R'])
+
+    # create tables with author fixed effects
+
+    # config['author_fe'] = True
+    # create_r_config(config, 'Rscripts/r_config.yaml')
+    # subprocess.run(['Rscript', 'Rscripts/regression_tables.R'])
+
+    # # create manuals figures
+
+    # config['manuals'] = True
+    # create_r_config(config, 'Rscripts/r_config.yaml')
+    # subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
 
     # # re-run predicted figures dropping obs before 1650
 

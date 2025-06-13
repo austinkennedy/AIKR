@@ -53,6 +53,7 @@ def run_cross_topics(config):
     print(cross)
     print('Exporting Data')
     cross.to_parquet(config['temporary_path'] + 'cross_topics.parquet', index = False)
+    # cross.to_csv(config['temporary_path'] + 'cross_topics.csv', index = False)
 
     del data, cross
     gc.collect()

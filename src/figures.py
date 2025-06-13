@@ -43,6 +43,7 @@ def calculate_summary_data(volumes, years, categories, config):
     avg_progress = {}
     avg_progress_transl = {}
     avg_progress_manual = {}
+    avg_industry = {}
 
     for year in years:
         
@@ -77,6 +78,11 @@ def calculate_summary_data(volumes, years, categories, config):
         else:
             avg_progress_manual[year] = np.nan
 
+        if len(volumes[volumes['Year'] == year]) != 0:
+            avg_industry[year] = statistics.mean(volumes[volumes['Year'] == year]['industry_percentile'])
+        else:
+            avg_industry[year] = np.nan
+
 
 
     #do a little data cleaning
@@ -99,7 +105,10 @@ def calculate_summary_data(volumes, years, categories, config):
     avg_progress_manual = pd.DataFrame.from_dict(avg_progress_manual, orient='index').reset_index()
     avg_progress_manual.columns = ['Year', 'avg_progress']
 
-    return moving_volumes, cat_avgs, cat_avgs_transl, cat_avgs_manual, volumes_time, avg_progress, avg_progress_transl, avg_progress_manual
+    avg_industry = pd.DataFrame.from_dict(avg_industry, orient='index').reset_index()
+    avg_industry.columns = ['Year', 'avg_industry']
+
+    return moving_volumes, cat_avgs, cat_avgs_transl, cat_avgs_manual, volumes_time, avg_progress, avg_progress_transl, avg_progress_manual, avg_industry
 
 
 def category_plots(volumes_time, categories, config, ymax):
@@ -147,7 +156,7 @@ def category_averages_manual(cat_avgs, cat_avgs_manual, config, categories):
 
     for i, cat in enumerate(categories):
         ax1.plot(cat_avgs['Year'], cat_avgs[cat], label = cat, color = colors[i], linestyle = lines_non_transl[i])
-        ax1.plot(cat_avgs_manual['Year'], cat_avgs_manual[cat], label = cat + ' (Manual)', color = colors[i], linestyle = lines_manual[i])
+        ax1.plot(cat_avgs_manual['Year'], cat_avgs_manual[cat], label = cat + ' (Manuals)', color = colors[i], linestyle = lines_manual[i])
     plt.legend(loc= 'upper center', ncol = 3)
     plt.ylim([0,1])
 
@@ -197,7 +206,7 @@ def progress_plots(avg_progress, config, translations = False, manual = False, a
     if translations:
         ax1.plot(df['Year'], avg_progress_transl['avg_progress'], label = 'Average Progress Score (Translations)', color = 'crimson', linestyle = 'dashed')
     elif manual:
-        ax1.plot(df['Year'], df_manual['avg_progress'], label = 'Average Progress Score (Manual)', color = 'crimson', linestyle = 'dashed')
+        ax1.plot(df['Year'], df_manual['avg_progress'], label = 'Average Progress Score (Manuals)', color = 'crimson', linestyle = 'dashed')
     ax1.legend(loc = 'upper right')
     ax1.set_xlabel('Year')
     ax1.set_yticks([0, 0.25, 0.5, 0.75, 1])
@@ -214,7 +223,7 @@ def progress_plots(avg_progress, config, translations = False, manual = False, a
     if translations:
         ax1.plot(df['Year'], df_transl['avg_progress_rolling'], label = 'Average Progress Score (Translations)', color = 'crimson', linestyle = 'dashed')
     elif manual:
-        ax1.plot(df['Year'], df_manual['avg_progress_rolling'], label = 'Average Progress Score (Manual)', color = 'crimson', linestyle = 'dashed')
+        ax1.plot(df['Year'], df_manual['avg_progress_rolling'], label = 'Average Progress Score (Manuals)', color = 'crimson', linestyle = 'dashed')
     ax1.legend(loc = 'upper right')
     ax1.set_xlabel('Year')
     ax1.set_yticks([0, 0.25, 0.5, 0.75, 1])
@@ -224,6 +233,26 @@ def progress_plots(avg_progress, config, translations = False, manual = False, a
         fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress_manual.png', dpi = 200)
     else:
         fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_progress.png', dpi = 200)
+
+def industry_plots(avg_industry, config):
+    df = avg_industry.copy()
+    df['avg_industry_rolling'] = df['avg_industry'].rolling(window=20, min_periods=1, center = True).mean() #rolling average of volumes
+
+    #raw values plot
+    fig, (ax1) = plt.subplots(1,1)
+    ax1.plot(df['Year'], df['avg_industry'], label = 'Average Industry Score (Percentile)', color = 'crimson', linestyle = 'solid')
+    ax1.legend(loc = 'upper right')
+    ax1.set_xlabel('Year')
+    ax1.set_yticks([0, 0.25, 0.5, 0.75, 1])
+    fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_industry_raw.png', dpi = 200)
+
+    #rolling average plot
+    fig, (ax1) = plt.subplots(1,1)
+    ax1.plot(df['Year'], df['avg_industry_rolling'], label = 'Average Industry Score (Percentile)', color = 'crimson', linestyle = 'solid')
+    ax1.legend(loc = 'upper right')
+    ax1.set_xlabel('Year')
+    ax1.set_yticks([0, 0.25, 0.5, 0.75, 1])
+    fig.savefig(config['output_path'] + 'volumes_over_time/' + 'avg_industry.png', dpi = 200)
 
 def topic_ternary_plots(config, topic_shares, years, categories):
 
@@ -300,7 +329,6 @@ def estc_distribution_plot(config, estc_data, volume_counts_by_year, all_years):
         ax1.set_yticks([0,0.25, 0.5, 0.75, 1])
         ax1.set_yticklabels(["0", "0.25", "0.5", "0.75", "1"])
         fig.savefig(config['output_path'] + 'estc_figures/estc_hathitrust_counts.png', dpi = 200)
-        fig.show()
 
         fig, (ax1) = plt.subplots(1,1)
         ax1.plot(volume_counts['Year'], volume_counts['estc_rolling_share'], color = 'red', label = 'ESTC', linestyle = 'dashed')
@@ -311,11 +339,10 @@ def estc_distribution_plot(config, estc_data, volume_counts_by_year, all_years):
         ax1.set_yticks([0,0.01, 0.02, 0.03])
         ax1.set_yticklabels(["0", "0.01", "0.02", "0.03"])
         fig.savefig(config['output_path'] + 'estc_figures/estc_hathitrust_pdf.png', dpi = 200)
-        fig.show()
 
 
 
-def ternary_plots(data, color, filepath, legend_title, years, categories, grayscale = False, size = None, decreasing_scale = False, show_legend = True):
+def ternary_plots(data, color, filepath, legend_title, years, categories, grayscale = False, size = None, decreasing_scale = False, show_legend = True, manual = False):
     #'data' needs to be a dictionary of dataframes, with volumes as rows, and columns 'Religion', 'Political Economy', and 'Science'
     #'color': which variable color of dots will be based on
     #'path': directory to save output figures
@@ -331,7 +358,12 @@ def ternary_plots(data, color, filepath, legend_title, years, categories, graysc
     make_dir(path = filepath)
 
     for year in years:
+
         df = data[year]
+
+        if manual:
+            df = df[df['manual_flag'] == 1]
+
         print(year)
 
         if decreasing_scale is True:
@@ -414,7 +446,7 @@ def run_figures(config):
     #fill missing years with 0
     volume_counts_by_year = volume_counts_by_year.set_index('Year').reindex(all_years, fill_value=0).reset_index().rename(columns={'HTID': 'Count'})
 
-    moving_volumes, cat_avgs, cat_avgs_transl, cat_avgs_manual, volumes_time, avg_progress, avg_progress_transl, avg_progress_manual = calculate_summary_data(volumes, years, categories, config)
+    moving_volumes, cat_avgs, cat_avgs_transl, cat_avgs_manual, volumes_time, avg_progress, avg_progress_transl, avg_progress_manual, avg_industry = calculate_summary_data(volumes, years, categories, config)
 
     make_dir(config['output_path'] + 'volumes_over_time/')
 
@@ -430,23 +462,29 @@ def run_figures(config):
     progress_plots(avg_progress, config, translations = True, avg_progress_transl = avg_progress_transl)
     progress_plots(avg_progress, config, manual = True, avg_progress_manual = avg_progress_manual)
 
+    industry_plots(avg_industry, config)
+
     #Create ESTC vs. HDL volume distribution plots
     if config['version'] == 'expanded_trimmed':
         estc_data = pd.read_csv(config['input_path'] + 'estc_1500_to_1800.csv')
         estc_distribution_plot(config, estc_data, volume_counts_by_year, all_years)
 
     for fig in config['ternary_figs']:
+
         ternary_plots(data=moving_volumes,
-                      years = half_centuries,
-                      categories=categories,
-                      color=fig['color'],
-                      filepath=config['output_path'] + fig['filepath'],
-                      grayscale=fig['grayscale'],
-                      size=fig['size'],
-                      decreasing_scale=fig['decreasing_scale'],
-                      legend_title=fig['legend_title'],
-                      show_legend=fig['show_legend']
-                      )
+                    years = half_centuries,
+                    categories=categories,
+                    color=fig['color'],
+                    filepath=config['output_path'] + fig['filepath'],
+                    grayscale=fig['grayscale'],
+                    size=fig['size'],
+                    decreasing_scale=fig['decreasing_scale'],
+                    legend_title=fig['legend_title'],
+                    show_legend=fig['show_legend'],
+                    manual = fig.get('manual', False) #if manual is True, only include volumes that reference manual or related words
+                    )
+        
+    
         
     del volumes, moving_volumes, cat_avgs, volumes_time, avg_progress, volume_counts_by_year
     gc.collect()

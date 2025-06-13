@@ -161,7 +161,24 @@ ternary_figs:
   size: null
   decreasing_scale: false
   show_legend: true
+- color: progress_main_percentile
+  legend_title: Progress (Percentile)
+  filepath: volume_triangles/progress_main_manuals/color/
+  grayscale: false
+  size: null
+  decreasing_scale: false
+  show_legend: true
+  manual: true
+- color: progress_main_percentile
+  legend_title: Progress (Percentile)
+  filepath: volume_triangles/progress_main_manuals/grayscale/
+  grayscale: true
+  size: null
+  decreasing_scale: false
+  show_legend: true
+  manual: true
 category_names:
 - Religion
 - Political Economy
 - Science
+author_fe: false

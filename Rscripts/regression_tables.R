@@ -42,6 +42,9 @@ volumes <- volumes %>%
   subset(select = -c(i.Value)) %>%
   rename(bin = Value)
 
+#change empty author values to NAs
+volumes$authors <- ifelse(volumes$authors == '', NA, volumes$authors)
+
 #Drop obs before 1600
 
 volumes <- volumes %>%
@@ -68,7 +71,20 @@ progress_var <- 'progress_main_percentile'
 #              + i(bin, ref = reference)
 #              - Religion
 #              + Year, data = volumes, cluster = c("Year"))
-
+if (config$author_fe == TRUE) {
+  mod <- feols(.[progress_var] ~ Science
+             + Political.Economy
+             + Science*Political.Economy
+             + Science*Religion
+             + Religion*Political.Economy
+             + i(bin, Science, reference)
+             + i(bin, Political.Economy, reference)
+             + i(bin, Science*Religion, reference)
+             + i(bin, Science*Political.Economy, reference)
+             + i(bin, Political.Economy*Religion, reference)
+             + i(bin, ref = reference)
+             - Religion | authors, data = volumes, cluster = c("Year"))
+} else {
 #Uses feols to carry clustered SEs throughout
 mod <- feols(.[progress_var] ~ Science
              + Political.Economy
@@ -82,6 +98,8 @@ mod <- feols(.[progress_var] ~ Science
              + i(bin, Political.Economy*Religion, reference)
              + i(bin, ref = reference)
              - Religion , data = volumes, cluster = c("Year"))
+
+}
 
 print(summary(mod))
 
@@ -187,6 +205,18 @@ if (!dir.exists(reg_path)){
   print("dir exists")
 }
 
+if (config$author_fe == TRUE) {
+  modelsummary(models,
+               stars = TRUE,
+               coef_rename = rename,
+               coef_omit = coef_omitted,
+               title = "Dependent Variable: Progress Percentile",
+               escape = FALSE,
+               threeparttable = TRUE,
+               notes = note,
+               output=paste(reg_path, '/results_author_fe.tex', sep = '')
+  )
+} else {
 modelsummary(models,
              stars = TRUE,
              coef_rename = rename,
@@ -198,7 +228,7 @@ modelsummary(models,
              output=paste(reg_path, '/results.tex', sep = '')
 )
 
-
+}
 ##########################################Industry Regressions##########################################
 
 
@@ -241,7 +271,37 @@ volumes$industry_percentile <- volumes[[ind]]
 #                industry_percentile +
 #                Year,
 #              data = volumes, cluster = c("Year"))
-
+if (config$author_fe == TRUE) {
+mod <- feols(progress_main_percentile ~ Science +
+               Political.Economy +
+               industry_percentile +
+               Science*Political.Economy +
+               Science*Religion +
+               Religion*Political.Economy +
+               Science*industry_percentile +
+               Political.Economy*industry_percentile +
+               # Religion*industry_percentile +
+               Science*Political.Economy*industry_percentile +
+               Science*Religion*industry_percentile +
+               Religion*Political.Economy*industry_percentile +
+               i(bin, Science, reference) +
+               i(bin, Political.Economy, reference) +
+               i(bin, industry_percentile, reference) +
+               i(bin, Science*Religion, reference) +
+               i(bin, Science*Political.Economy, reference) +
+               i(bin, Political.Economy*Religion, reference) +
+               i(bin, Science*industry_percentile, reference) +
+               i(bin, Political.Economy*industry_percentile, reference) +
+               # i(bin, Religion*industry_percentile, 1610) +
+               i(bin, Science*Political.Economy*industry_percentile, reference) +
+               i(bin, Science*Religion*industry_percentile, reference) +
+               i(bin, Religion*Political.Economy*industry_percentile, reference) +
+               i(bin, ref = reference) -
+               Religion -
+               Religion*industry_percentile+
+               industry_percentile | authors,
+             data = volumes, cluster = c("Year"))
+} else {
 mod <- feols(progress_main_percentile ~ Science +
                Political.Economy +
                industry_percentile +
@@ -272,7 +332,7 @@ mod <- feols(progress_main_percentile ~ Science +
                industry_percentile,
              data = volumes, cluster = c("Year"))
 
-
+}
 print(summary(mod))
 
 estimates <- tibble::rownames_to_column(as.data.frame(mod$coeftable), "coefficient")
@@ -382,6 +442,17 @@ if (!dir.exists(reg_path)){
   print("dir exists")
 }
 
+if (config$author_fe == TRUE) {
+  modelsummary(models,
+               stars = TRUE,
+               coef_rename = cm,
+               coef_omit = coef_omitted,
+               title = 'Dependent Variable: Progress Percentile',
+               escape = FALSE,
+               threeparttable = TRUE,
+               notes = note,
+               output=paste(reg_path, '/results_author_fe.tex', sep = ''))
+} else {
 modelsummary(models,
              stars = TRUE,
              coef_rename = cm,
@@ -392,4 +463,5 @@ modelsummary(models,
              notes = note,
              output=paste(reg_path, '/results.tex', sep = ''))
 
+}
 }

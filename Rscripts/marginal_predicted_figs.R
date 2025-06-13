@@ -11,6 +11,7 @@ library(data.table)
 library(sandwich)
 library(car)
 library(ggpubr)
+library(scales)
 
 #load configuration file
 config <- yaml.load_file('./Rscripts/r_config.yaml')
@@ -18,6 +19,12 @@ config <- yaml.load_file('./Rscripts/r_config.yaml')
 volumes <- read.csv(paste(config$temporary_path, 'volumes_scores.csv', sep = '/'))
 
 output_folder <- config$output_path
+
+manuals <- if ('manuals' %in% names(config)) {
+  config$manuals
+} else {
+  FALSE
+}
 
 #Create years and bins, set global params
 years <- seq(1510, 1890, by = 1)
@@ -46,6 +53,10 @@ volumes <- volumes %>%
 volumes <- volumes %>%
   filter(Year > min_year)
 
+if (manuals == TRUE){
+  volumes <- volumes %>%
+    filter(manual_flag == 1)
+}
 #Regressions
 reference = min(bins)
 
@@ -128,8 +139,12 @@ model_formula <- as.formula(paste0(
 model_marginal_predicted <- lm(model_formula, data = volumes)
 print(summary(model_marginal_predicted))
 
-path <- paste(config$output_path, 'regression_figures/', progress_var, sep='')
-
+if (manuals == TRUE){
+  path <- paste(config$output_path, 'regression_figures_manuals/', progress_var, sep='')
+}
+else{
+  path <- paste(config$output_path, 'regression_figures/', progress_var, sep='')
+}
 
 if (!dir.exists(path)){
   dir.create(path, recursive = TRUE)
@@ -191,6 +206,103 @@ predicted_fig <- ggplot(predicted, aes(x = bin, y = fit, group = label)) +
 
 
 ggsave(paste(path, '/predicted_values.png', sep=''), width = 8)
+
+######figure with varying weights of PE and Science
+
+s100_p <- pred(lm = model_marginal_predicted, sci = 1, rel = 0, flex = 0)
+s80f20_p <- pred(lm = model_marginal_predicted, sci = 0.8, rel = 0, flex = 0.2)
+s60f40_p <- pred(lm = model_marginal_predicted, sci = 0.6, rel = 0, flex = 0.4)
+s50f50_p <- pred(lm = model_marginal_predicted, sci = 0.5, rel = 0, flex = 0.5)
+s40f60_p <- pred(lm = model_marginal_predicted, sci = 0.4, rel = 0, flex = 0.6)
+s20f80_p <- pred(lm = model_marginal_predicted, sci = 0.2, rel = 0, flex = 0.8)
+f100_p <- pred(lm = model_marginal_predicted, sci = 0, rel = 0, flex = 1)
+s100_p$label <- paste0("100% ", category_science)
+s80f20_p$label <- paste0("80% ", category_science, " 20% ", category_flexible)
+s60f40_p$label <- paste0("60% ", category_science, " 40% ", category_flexible)
+s50f50_p$label <- paste0("50% ", category_science, " 50% ", category_flexible)
+s40f60_p$label <- paste0("40% ", category_science, " 60% ", category_flexible)
+s20f80_p$label <- paste0("20% ", category_science, " 80% ", category_flexible)
+f100_p$label <- paste0("100% ", category_flexible)
+s100_p$bin <- bins
+s80f20_p$bin <- bins
+s60f40_p$bin <- bins
+s50f50_p$bin <- bins
+s40f60_p$bin <- bins
+s20f80_p$bin <- bins
+f100_p$bin <- bins
+
+predicted_s_f <- rbind(s100_p, s80f20_p, s60f40_p,
+                                 s50f50_p, s40f60_p, s20f80_p,
+                                f100_p)
+
+predicted_s_f$label <- factor(predicted_s_f$label, levels = c(paste0("100% ", category_science),
+                                                               paste0("80% ", category_science, " 20% ", category_flexible),
+                                                               paste0("60% ", category_science, " 40% ", category_flexible),
+                                                               paste0("50% ", category_science, " 50% ", category_flexible),
+                                                               paste0("40% ", category_science, " 60% ", category_flexible),
+                                                               paste0("20% ", category_science, " 80% ", category_flexible),
+                                                               paste0("100% ", category_flexible)))
+
+predicted_s_f$bin <- as.numeric(as.character(predicted_s_f$bin))
+
+lty_pal <- c(linetype_pal()(7))
+
+predicted_fig_s_f <- ggplot(predicted_s_f, aes(x = bin, y = fit, group = label)) +
+  geom_line(aes(color = label, linetype = label)) +
+  geom_ribbon(aes(y = fit, ymin = lwr, ymax = upr, fill = label), alpha = 0.2) +
+  labs(title = "Predicted Values", x = "Year", y = "Value") +
+  scale_linetype_manual(values = lty_pal) +
+  ylim(-0.4, 2.25) +
+  theme_light()
+
+ggsave(paste(path, '/predicted_values_sci_pol.png', sep=''), width = 9)
+
+s100p <- pred(lm = model_marginal_predicted, sci = 1, rel = 0, flex = 0)
+s80_r20p <- pred(lm = model_marginal_predicted, sci = 0.8, rel = 0.2, flex = 0)
+s60_r40p <- pred(lm = model_marginal_predicted, sci = 0.6, rel = 0.4, flex = 0)
+s50_r50p <- pred(lm = model_marginal_predicted, sci = 0.5, rel = 0.5, flex = 0)
+s40_r60p <- pred(lm = model_marginal_predicted, sci = 0.4, rel = 0.6, flex = 0)
+s20_r80p <- pred(lm = model_marginal_predicted, sci = 0.2, rel = 0.8, flex = 0)
+r100p <- pred(lm = model_marginal_predicted, sci = 0, rel = 1, flex = 0)
+s100p$label <- paste0("100% ", category_science)
+s80_r20p$label <- paste0("80% ", category_science, " 20% ", category_religion)
+s60_r40p$label <- paste0("60% ", category_science, " 40% ", category_religion)
+s50_r50p$label <- paste0("50% ", category_science, " 50% ", category_religion)
+s40_r60p$label <- paste0("40% ", category_science, " 60% ", category_religion)
+s20_r80p$label <- paste0("20% ", category_science, " 80% ", category_religion)
+r100p$label <- paste0("100% ", category_religion)
+s100p$bin <- bins
+s80_r20p$bin <- bins
+s60_r40p$bin <- bins
+s50_r50p$bin <- bins
+s40_r60p$bin <- bins
+s20_r80p$bin <- bins
+r100p$bin <- bins
+
+predicted_s_r <- rbind(s100p, s80_r20p, s60_r40p,
+                                 s50_r50p, s40_r60p, s20_r80p,
+                                 r100p)
+
+predicted_s_r$label <- factor(predicted_s_r$label, levels = c(paste0("100% ", category_science),
+                                                               paste0("80% ", category_science, " 20% ", category_religion),
+                                                               paste0("60% ", category_science, " 40% ", category_religion),
+                                                               paste0("50% ", category_science, " 50% ", category_religion),
+                                                               paste0("40% ", category_science, " 60% ", category_religion),
+                                                               paste0("20% ", category_science, " 80% ", category_religion),
+                                                               paste0("100% ", category_religion)))
+
+predicted_s_r$bin <- as.numeric(as.character(predicted_s_r$bin))
+
+predicted_fig_s_r <- ggplot(predicted_s_r, aes(x = bin, y = fit, group = label)) +
+  geom_line(aes(color = label, linetype = label)) +
+  geom_ribbon(aes(y = fit, ymin = lwr, ymax = upr, fill = label), alpha = 0.2) +
+  labs(title = "Predicted Values", x = "Year", y = "Value") +
+  scale_linetype_manual(values = lty_pal) +
+  ylim(-0.4, 2.25) +
+  theme_light()
+
+ggsave(paste(path, '/predicted_values_sci_rel.png', sep=''), width = 8)
+
 
 }
 
@@ -332,7 +444,12 @@ figure <- ggarrange(predicted_fig_0, predicted_fig_1,
                     widths = c(5.5,8))
 show(figure)
 
-path <- paste(output_folder, 'regression_figures/', industry_var, sep='')
+if (manuals == TRUE){
+  path <- paste(config$output_path, 'regression_figures_manuals/', industry_var, sep='')
+}
+else{
+  path <- paste(config$output_path, 'regression_figures/', industry_var, sep='')
+}
 
 if (!dir.exists(path)){
   dir.create(path, recursive = TRUE)
