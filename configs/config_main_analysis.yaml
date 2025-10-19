@@ -209,3 +209,19 @@ ternary_figs:
     decreasing_scale: false
     show_legend: true
     manual: true
+
+  - color: progress_chatgpt_percentile
+    legend_title: Progress (Percentile)
+    filepath: volume_triangles/progress_chatgpt/color/
+    grayscale: false
+    size: null
+    decreasing_scale: false
+    show_legend: true
+
+  - color: progress_chatgpt_percentile
+    legend_title: Progress (Percentile)
+    filepath: volume_triangles/progress_chatgpt/grayscale/
+    grayscale: true
+    size: null
+    decreasing_scale: false
+    show_legend: true

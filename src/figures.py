@@ -87,6 +87,9 @@ def calculate_summary_data(volumes, years, categories, config):
 
     #do a little data cleaning
     for category in categories:
+        if category not in category_counts_by_year.columns:
+            category_counts_by_year[category] = 0
+            
         volumes_time[category] = pd.concat(volumes_time[category], ignore_index=True)
         counts = category_counts_by_year[['Year', category]].rename(columns={category: 'Volumes'}) #get volume count for each category by year
         volumes_time[category] = pd.merge(volumes_time[category], counts, on='Year', how = 'left') #merge counts with category averages, by category
@@ -377,6 +380,7 @@ def ternary_plots(data, color, filepath, legend_title, years, categories, graysc
                                  size_max=13,
                                  range_color=[0,1])
         
+
         fig.update_layout(title_text = str(year),
                         title_font_size=30,
                         font_size=20,
@@ -389,7 +393,10 @@ def ternary_plots(data, color, filepath, legend_title, years, categories, graysc
         fig.update_ternaries(bgcolor="white",
                         aaxis_linecolor="black",
                         baxis_linecolor="black",
-                        caxis_linecolor="black"
+                        caxis_linecolor="black",
+                        # aaxis_min = 0.2,
+                        # baxis_min = 0.35,
+                        # caxis_min = 0.25,
                         )
         
         if grayscale is True:

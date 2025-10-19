@@ -12,17 +12,17 @@ eliminated_topics: []
 # Classification is subjective—check before running 'topic_volume_weights.py'
 categories:
   Religion:
-    - 6
-    - 47
-    - 56
+    - 25
+    - 39
+    - 45
   Political Economy:
-    - 18
-    - 30
-    - 46
+    - 19
+    - 53
+    - 59
   Science:
-    - 8
-    - 9
+    - 23
     - 26
+    - 36
 
 half_century: true
 

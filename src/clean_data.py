@@ -113,8 +113,8 @@ def run_clean_data_expanded_trimmed(config):
         topic_data = pd.read_csv(config['input_path'] + '40_Coherence_topics.txt', sep = '\t', header = None)
         topic_keys = pd.read_csv(config['input_path'] + '40_Coherence_keys.txt', sep = '\t', header=None)
     elif config['version'] == 'pre_1800':
-        topic_data = pd.read_csv(config['input_path'] + 'Pre1800_infer_topics.txt', sep = '\t', header = None)        
-        topic_keys = pd.read_csv(config['input_path'] + 'Pre1800_keys.txt', sep = '\t', header=None)
+        topic_data = pd.read_csv(config['input_path'] + 'Pre-Post-1800.txt', sep = '\t', header = None)        
+        topic_keys = pd.read_csv(config['input_path'] + 'Pre-Post-1800_keys.txt', sep = '\t', header=None)
     else:
         raise ValueError("Invalid version specified. Please choose 'expanded_trimmed', 'coherence', or 'pre_1800'.")
     
@@ -125,6 +125,7 @@ def run_clean_data_expanded_trimmed(config):
     industry = pd.read_csv(config['input_path'] + 'industry_scores_jan2025.csv')
     industry_scores_full_dict = pd.read_csv(config['input_path'] + 'industry_scores_full_dict.csv')
     updated_optimism_industry = pd.read_csv(config['input_path'] + 'industry_optimism_may_2025.csv')
+    progress_chatgpt = pd.read_csv(config['input_path'] + 'progress_chatgpt_v2.csv')
 
 
     print('Volume Data Dimensions:' + str(topic_data.shape))
@@ -163,7 +164,10 @@ def run_clean_data_expanded_trimmed(config):
     updated_optimism_industry = updated_optimism_industry.rename(columns={'Unnamed: 0': 'HTID', 'Optimism Double Meaning':'optimism_abbreviated', 'Industrialization Prior': 'industry_1708'})
     updated_optimism_industry['HTID'] = updated_optimism_industry['HTID'].map(lambda x: x.replace('.txt', ''))#remove '.txt' at the end of each string for HTIDs
 
-    sentiment_dfs = [industry, industry_scores_full_dict, sentiment, updated_progress, updated_optimism_industry]
+    progress_chatgpt = progress_chatgpt.rename(columns={'Unnamed: 0': 'HTID', 'ChatGPT Progress': 'progress_chatgpt'})
+    progress_chatgpt['HTID'] = progress_chatgpt['HTID'].map(lambda x: x.replace('.txt', ''))#remove '.txt' at the end of each string for HTIDs
+
+    sentiment_dfs = [industry, industry_scores_full_dict, sentiment, updated_progress, updated_optimism_industry, progress_chatgpt]
 
     print('Sentiment Dimensions:' + str(sentiment.shape))
     print('Industry Dimensions:' + str(industry.shape))
@@ -181,7 +185,7 @@ def run_clean_data_expanded_trimmed(config):
     metadata.to_csv(config['temporary_path'] + 'metadata.csv', index=False)
     sentiment_scores_all.to_csv(config['temporary_path'] + 'sentiment_scores.csv', index=False)
 
-    del topic_data, topic_keys, metadata, topic_data_cleaned, sentiment, updated_progress, industry, sentiment_scores_all, industry_scores_full_dict, updated_optimism_industry
+    del topic_data, topic_keys, metadata, topic_data_cleaned, sentiment, updated_progress, industry, sentiment_scores_all, industry_scores_full_dict, updated_optimism_industry, progress_chatgpt
     gc.collect()
 
 def run_clean_data(config):

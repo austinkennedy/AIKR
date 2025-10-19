@@ -76,8 +76,7 @@ if (category_flexible == 'Political Economy') {
 
 print(names(volumes))
 
-# progress_vars <- list('progress_main_percentile', 'progress_original_percentile', 'progress_secondary_percentile')
-progress_vars <- list('progress_main_percentile')
+progress_vars <- list('progress_main_percentile', 'progress_original_percentile', 'progress_secondary_percentile', 'progress_chatgpt_percentile')
 
 for (progress_var in progress_vars){
 # model <- feols(
@@ -252,7 +251,8 @@ predicted_fig_s_f <- ggplot(predicted_s_f, aes(x = bin, y = fit, group = label))
   geom_ribbon(aes(y = fit, ymin = lwr, ymax = upr, fill = label), alpha = 0.2) +
   labs(title = "Predicted Values", x = "Year", y = "Value") +
   scale_linetype_manual(values = lty_pal) +
-  ylim(-0.4, 2.25) +
+  # ylim(-0.4, 2.25) +
+  coord_cartesian(ylim = c(-0.4, 2.25)) +
   theme_light()
 
 ggsave(paste(path, '/predicted_values_sci_pol.png', sep=''), width = 9)
@@ -298,13 +298,14 @@ predicted_fig_s_r <- ggplot(predicted_s_r, aes(x = bin, y = fit, group = label))
   geom_ribbon(aes(y = fit, ymin = lwr, ymax = upr, fill = label), alpha = 0.2) +
   labs(title = "Predicted Values", x = "Year", y = "Value") +
   scale_linetype_manual(values = lty_pal) +
-  ylim(-0.4, 2.25) +
+  # ylim(-0.4, 2.25) +
+  coord_cartesian(ylim = c(-0.4, 2.25)) +
   theme_light()
 
 ggsave(paste(path, '/predicted_values_sci_rel.png', sep=''), width = 8)
 
-
-}
+#save model from progress_percentile_main
+if (progress_var == 'progress_main_percentile'){
 
 ##########################################Industry Predicted Figs
 
@@ -322,7 +323,7 @@ volumes$bin <- factor(volumes$bin)
 #   "bin*industry_percentile + Year"
 # ))
 
-industry_vars <- list("industry_percentile", "industry_1708_percentile")
+industry_vars <- list("industry_percentile", "industry_1708_percentile", "industry_full_dict_percentile")
 
 for (industry_var in industry_vars){
 
@@ -513,4 +514,6 @@ print(predicted_fig)
 
 ggsave(paste(path, '/predicted_values_sci_pe.png', sep =''), width = 13.5)
 
+}
+}
 }

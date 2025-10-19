@@ -10,10 +10,10 @@ from src.figures import run_figures
 from src.utils import create_r_config
 
 
-def main_expanded_trimmed_unbinned():
+def run_unbinned_analysis():
     """Runs the entire analysis pipeline for the expanded and trimmed dataset, including alternative corners"""
 
-    config = load_config('configs/config_expanded_trimmed.yaml')
+    config = load_config('configs/config_main_analysis.yaml')
 
     config['temporary_path'] = './data/expanded_trimmed_unbinned/temporary/'
     config['output_path'] = './data/expanded_trimmed_unbinned/output/'
@@ -39,4 +39,4 @@ def main_expanded_trimmed_unbinned():
     subprocess.run(['Rscript', 'Rscripts/marginal_predicted_figs.R'])
 
 if __name__ == "__main__":
-    main_expanded_trimmed_unbinned()
+    run_unbinned_analysis()

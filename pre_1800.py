@@ -9,10 +9,10 @@ from src.volume_data import run_volume_data
 from src.figures import run_figures
 from src.utils import create_r_config
 
-def main_coherence():
-    """Runs the entire analysis pipeline for the data based on coherence scores."""
+def run_pre_1800():
+    """Runs the entire analysis pipeline for the data based on pre_1800 scores."""
 
-    config = load_config('configs/config_coherence.yaml')
+    config = load_config('configs/config_pre_1800.yaml')
 
     run_clean_data(config)
     run_cross_topics(config)
@@ -26,4 +26,4 @@ def main_coherence():
     subprocess.run(['Rscript', 'Rscripts/additional_ternary_figs.R'])
 
 if __name__ == "__main__":
-    main_coherence()
+    run_pre_1800()

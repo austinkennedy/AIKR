@@ -14,6 +14,9 @@ famous_merged <- merge(volumes[,c('HTID', 'Religion', 'Science', 'Political.Econ
 
 write.csv(famous_merged, paste(config$temporary_path, 'famous_merged.csv', sep = '/'))
 
+#set seed for reproducability
+set.seed(42)
+
 famous_selected <- famous_merged %>%
   group_by(Title) %>%
   slice_sample(n=1)
